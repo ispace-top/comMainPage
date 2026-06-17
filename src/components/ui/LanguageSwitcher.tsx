@@ -14,6 +14,53 @@ const langLabels: Record<Lang, string> = {
   en: "English",
 };
 
+// Simple inline SVG flags
+function FlagIcon({ lang }: { lang: Lang }) {
+  if (lang === "zh") {
+    return (
+      <svg className="size-5 shrink-0" viewBox="0 0 30 20">
+        <rect width="30" height="20" fill="#DE2910" rx="1" />
+        <path d="M2 4l2.5 1.8L3 9.5l2.5-1.8L8 9.5 7 5.8 9.5 4H6l-1-3.5L4 4H2z" fill="#FFDE00" />
+        <path d="M12 4l1.3.9L14 4l-.3 1.4 1.3.9H13.5l-.5 1.3-.5-1.3H11l1.3-.9L12 4z" fill="#FFDE00" />
+        <path d="M10 8l.8.6.2-1h-1l.8-.6-.3-1 .8.6.8-.6-.3 1 .8.6h-1l.2 1z" fill="#FFDE00" />
+      </svg>
+    );
+  }
+  return (
+    <svg className="size-5 shrink-0" viewBox="0 0 30 20">
+      <rect width="30" height="4" fill="#B22234" rx="0.5" />
+      <rect y="4" width="30" height="4" fill="#FFFFFF" rx="0" />
+      <rect y="8" width="30" height="4" fill="#B22234" rx="0" />
+      <rect y="12" width="30" height="4" fill="#FFFFFF" rx="0" />
+      <rect y="16" width="30" height="4" fill="#B22234" rx="0.5" />
+      <rect width="15" height="10" fill="#3C3B6E" rx="0.5" />
+      <circle cx="2.5" cy="1" r="0.3" fill="white" />
+      <circle cx="5" cy="1" r="0.3" fill="white" />
+      <circle cx="7.5" cy="1" r="0.3" fill="white" />
+      <circle cx="10" cy="1" r="0.3" fill="white" />
+      <circle cx="12.5" cy="1" r="0.3" fill="white" />
+      <circle cx="3.75" cy="3" r="0.3" fill="white" />
+      <circle cx="6.25" cy="3" r="0.3" fill="white" />
+      <circle cx="8.75" cy="3" r="0.3" fill="white" />
+      <circle cx="11.25" cy="3" r="0.3" fill="white" />
+      <circle cx="2.5" cy="5" r="0.3" fill="white" />
+      <circle cx="5" cy="5" r="0.3" fill="white" />
+      <circle cx="7.5" cy="5" r="0.3" fill="white" />
+      <circle cx="10" cy="5" r="0.3" fill="white" />
+      <circle cx="12.5" cy="5" r="0.3" fill="white" />
+      <circle cx="3.75" cy="7" r="0.3" fill="white" />
+      <circle cx="6.25" cy="7" r="0.3" fill="white" />
+      <circle cx="8.75" cy="7" r="0.3" fill="white" />
+      <circle cx="11.25" cy="7" r="0.3" fill="white" />
+      <circle cx="2.5" cy="9" r="0.3" fill="white" />
+      <circle cx="5" cy="9" r="0.3" fill="white" />
+      <circle cx="7.5" cy="9" r="0.3" fill="white" />
+      <circle cx="10" cy="9" r="0.3" fill="white" />
+      <circle cx="12.5" cy="9" r="0.3" fill="white" />
+    </svg>
+  );
+}
+
 export function LanguageSwitcher({
   currentLang,
   variant = "desktop",
@@ -46,12 +93,13 @@ export function LanguageSwitcher({
             key={lang}
             onClick={() => switchLang(lang)}
             className={[
-              "flex-1 py-2 text-sm font-medium rounded-sm transition-colors",
+              "flex-1 py-2 text-sm font-medium rounded-sm flex items-center justify-center gap-1.5 transition-colors",
               lang === currentLang
                 ? "bg-white text-primary-600 shadow-xs"
-                : "text-neutral-500 hover:text-neutral-700",
+                : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50",
             ].join(" ")}
           >
+            <FlagIcon lang={lang} />
             {langLabels[lang]}
           </button>
         ))}
@@ -63,12 +111,10 @@ export function LanguageSwitcher({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-1 px-2 py-1 text-sm font-medium text-neutral-600 rounded-md hover:bg-neutral-100 transition-colors"
+        className="inline-flex items-center gap-1.5 px-2 py-1 text-sm font-medium text-neutral-600 rounded-md hover:bg-neutral-100 transition-colors"
         aria-label="切换语言"
       >
-        <svg className="size-5 text-neutral-400" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M4.5 2A1.5 1.5 0 003 3.5v10.25a2 2 0 001.17 1.8l.04.02c.433.199 1.05.43 1.79.43.74 0 1.357-.231 1.79-.43l.04-.02A2 2 0 009 13.75V3.5A1.5 1.5 0 007.5 2h-3zm1.76 9.7a.75.75 0 01.88-.69 2.5 2.5 0 012.36 2.46.75.75 0 11-1.5.02.998.998 0 00-.95-.99.75.75 0 01-.79-.8zM16 5.21a.75.75 0 011.5 0v7.54a2.5 2.5 0 01-2.5 2.5h-1a.75.75 0 010-1.5h1a1 1 0 001-1V5.21zm-4-1.96a.75.75 0 011.5 0v9.5a.75.75 0 01-1.5 0v-9.5z" clipRule="evenodd" />
-        </svg>
+        <FlagIcon lang={currentLang} />
         <span>{langLabels[currentLang]}</span>
         <svg className="size-4 text-neutral-400" viewBox="0 0 16 16" fill="currentColor">
           <path fillRule="evenodd" d="M4.23 5.23a.75.75 0 011.06 0L8 7.94l2.71-2.71a.75.75 0 111.06 1.06l-3.25 3.25a.75.75 0 01-1.06 0L4.23 6.29a.75.75 0 010-1.06z" clipRule="evenodd" />
@@ -81,12 +127,13 @@ export function LanguageSwitcher({
               <button
                 onClick={() => switchLang(lang)}
                 className={[
-                  "w-full text-left h-10 px-4 text-sm transition-colors",
+                  "w-full text-left h-10 px-4 text-sm flex items-center gap-2 transition-colors",
                   lang === currentLang
-                    ? "text-primary-600 font-semibold"
+                    ? "text-primary-600 font-semibold bg-primary-50/50"
                     : "text-neutral-600 hover:bg-neutral-100",
                 ].join(" ")}
               >
+                <FlagIcon lang={lang} />
                 {langLabels[lang]}
               </button>
             </li>

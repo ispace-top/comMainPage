@@ -1,0 +1,111 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Switch } from "@/components/ui/Switch";
+import { useToast } from "@/components/ui/Toast";
+
+const tabs = [
+  { key: "site", label: "站点信息" },
+  { key: "seo", label: "SEO 配置" },
+  { key: "nav", label: "导航管理" },
+  { key: "push", label: "推送配置" },
+];
+
+export default function SettingsPage() {
+  const [activeTab, setActiveTab] = useState("site");
+  const [saving, setSaving] = useState(false);
+  const { addToast } = useToast();
+
+  const handleSave = async () => {
+    setSaving(true);
+    await new Promise(r => setTimeout(r, 1000));
+    setSaving(false);
+    addToast("success", "设置已保存");
+  };
+
+  return (
+    <div className="p-6">
+      <div className="max-w-3xl">
+        <h1 className="text-2xl font-bold text-neutral-800 mb-2">全局设置</h1>
+        <p className="text-sm text-neutral-500 mb-8">管理站点基础信息、SEO配置、导航菜单和推送通知渠道。</p>
+
+        {/* Tabs */}
+        <div className="flex gap-1 bg-neutral-100 p-1 rounded-md mb-8">
+          {tabs.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={["flex-1 py-2 px-4 text-sm font-medium rounded-sm transition-colors", activeTab === tab.key ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-500 hover:text-neutral-700"].join(" ")}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content */}
+        <div className="bg-white border border-neutral-200 rounded-md p-6">
+          {activeTab === "site" && (
+            <div className="space-y-5">
+              <Input label="站点名称" defaultValue="认证通" />
+              <Input label="站点副标题" defaultValue="专业企业认证服务" />
+              <Textarea label="站点简介" defaultValue="认证通为企业提供ISO9001等国际标准认证咨询服务。" />
+              <div>
+                <label className="block mb-2 text-sm font-medium text-neutral-700">站点 Logo</label>
+                <div className="flex items-center gap-4">
+                  <div className="size-16 bg-neutral-100 rounded-md flex items-center justify-center text-neutral-400 text-xs">Logo</div>
+                  <Button variant="secondary" size="sm">上传 Logo</Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "seo" && (
+            <div className="space-y-5">
+              <Input label="首页标题 (Title)" defaultValue="认证通 — 专业企业认证服务" />
+              <Textarea label="首页描述 (Description)" defaultValue="认证通为企业提供ISO9001等国际标准认证咨询服务。" />
+              <Input label="关键词 (Keywords)" defaultValue="ISO9001,ISO14001,企业认证" />
+              <Switch checked={true} onChange={() => {}} label="启用 JSON-LD 结构化数据" />
+            </div>
+          )}
+
+          {activeTab === "nav" && (
+            <div className="space-y-1">
+              {["首页", "认证服务", "成功案例", "行业洞察", "关于我们", "联系我们"].map((name, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 rounded-md hover:bg-white border border-transparent hover:border-neutral-200 transition-colors group">
+                  <span className="text-neutral-400 cursor-grab">⠿</span>
+                  <span className="flex-1 text-sm font-medium text-neutral-700">{name}</span>
+                  <span className="text-sm text-neutral-400">/{i === 0 ? "" : name.toLowerCase()}</span>
+                  <span className="px-2 py-0.5 text-xs rounded-full bg-success-50 text-success-700">已启用</span>
+                  <div className="hidden group-hover:flex gap-2">
+                    <Button variant="tertiary" size="sm">编辑</Button>
+                    <Button variant="tertiary" size="sm">删除</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "push" && (
+            <div className="space-y-5">
+              <Input label="企微 Webhook URL" type="url" placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=..." />
+              <Input label="SMTP 服务器" placeholder="smtp.example.com" />
+              <Input label="SMTP 端口" placeholder="587" />
+              <Input label="发件邮箱" type="email" placeholder="noreply@renzheng.com" />
+              <Switch checked={true} onChange={() => {}} label="启用邮件通知" />
+              <Switch checked={true} onChange={() => {}} label="启用企微通知" />
+            </div>
+          )}
+        </div>
+
+        {/* Bottom action bar */}
+        <div className="flex items-center justify-end gap-3 mt-6">
+          <Button variant="tertiary">重置</Button>
+          <Button variant="primary" loading={saving} onClick={handleSave}>保存设置</Button>
+        </div>
+      </div>
+    </div>
+  );
+}

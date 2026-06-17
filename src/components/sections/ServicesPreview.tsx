@@ -36,19 +36,19 @@ export function ServicesPreview({ lang }: ServicesPreviewProps) {
             <Link
               key={service.slug}
               href={`/${lang}/services/${service.slug}`}
-              className="group block bg-white border border-neutral-200 rounded-md p-6 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 ease-out reveal-on-scroll"
+              className="group flex flex-col h-full bg-white border border-neutral-200 rounded-md p-6 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 ease-out reveal-on-scroll"
               style={{ transitionDelay: `${i * 80}ms` }}
             >
               <span className="text-3xl">{descIcons[i]}</span>
               <h3 className="mt-4 text-xl font-semibold text-neutral-800 group-hover:text-primary-500 transition-colors">
                 {lang === "zh" ? service.zh : service.en}
               </h3>
-              <p className="mt-2 text-sm text-neutral-500">
+              <p className="mt-2 text-sm text-neutral-500 flex-1">
                 {lang === "zh"
                   ? "了解认证流程、适用企业及所需材料，开启合规之旅。"
                   : "Learn about the certification process, applicable enterprises, and required materials."}
               </p>
-              <span className="inline-flex items-center gap-1 mt-4 text-sm font-medium text-primary-500 group-hover:gap-2 transition-all">
+              <span className="inline-flex items-center gap-1 mt-4 text-sm font-medium text-primary-500 group-hover:gap-2 transition-all shrink-0">
                 {lang === "zh" ? "了解详情" : "Learn More"}
                 <svg className="size-4" viewBox="0 0 16 16" fill="currentColor">
                   <path fillRule="evenodd" d="M6.22 4.22a.75.75 0 011.06 0l3.25 3.25a.75.75 0 010 1.06l-3.25 3.25a.75.75 0 01-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 010-1.06z" clipRule="evenodd" />

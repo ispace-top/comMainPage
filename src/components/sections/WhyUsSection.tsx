@@ -86,7 +86,7 @@ export function WhyUsSection({ lang }: WhyUsSectionProps) {
         </div>
         <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {t.features.map((feature, i) => (
-            <div key={i} className="reveal-on-scroll" style={{ transitionDelay: `${i * 100}ms` }}>
+            <div key={i} className="h-full reveal-on-scroll" style={{ transitionDelay: `${i * 100}ms` }}>
               <FeatureCard
                 icon={icons[i]}
                 title={feature.title}

@@ -95,12 +95,12 @@ export function FeatureCard({
   description: string;
 }) {
   return (
-    <Card variant="feature">
-      <div className="flex items-center justify-center size-12 rounded-lg bg-primary-50 text-primary-500 mb-4">
+    <Card variant="feature" className="h-full flex flex-col">
+      <div className="flex items-center justify-center size-12 rounded-lg bg-primary-50 text-primary-500 mb-4 shrink-0">
         <span className="size-8">{icon}</span>
       </div>
-      <h3 className="text-xl font-semibold text-neutral-800 mb-2">{title}</h3>
-      <p className="text-base text-neutral-600">{description}</p>
+      <h3 className="text-xl font-semibold text-neutral-800 mb-2 shrink-0">{title}</h3>
+      <p className="text-base text-neutral-600 flex-1">{description}</p>
     </Card>
   );
 }

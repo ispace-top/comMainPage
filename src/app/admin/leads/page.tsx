@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Table, type TableColumn } from "@/components/ui/Table";
 import { Badge, type BadgeStatus } from "@/components/ui/Badge";
@@ -90,9 +91,13 @@ function KanbanView() {
 }
 
 export default function LeadsPage() {
+  const searchParams = useSearchParams();
+  const viewParam = searchParams.get("view");
+  const view: "list" | "kanban" = viewParam === "kanban" ? "kanban" : "list";
   const [page, setPage] = useState(1);
-  const [view, setView] = useState<"list" | "kanban">("list");
   const PAGE_SIZE = 10;
+
+  // Sidebar navigation drives view switching — no need for in-page toggle
 
   return (
     <div className="p-6">
@@ -101,14 +106,7 @@ export default function LeadsPage() {
           <h1 className="text-2xl font-bold text-neutral-800">线索中心</h1>
           <p className="text-sm text-neutral-600 mt-1">管理客户留资数据，跟踪线索转化状态。</p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex bg-neutral-100 rounded-md p-1">
-            {(["list", "kanban"] as const).map(v => (
-              <button key={v} onClick={() => setView(v)} className={["py-1.5 px-3 text-xs font-semibold rounded-sm transition-colors", view === v ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-600 hover:text-neutral-800"].join(" ")}>
-                {v === "list" ? "列表" : "看板"}
-              </button>
-            ))}
-          </div>
+        <div>
           <Button variant="secondary" size="sm">导出 Excel</Button>
         </div>
       </div>

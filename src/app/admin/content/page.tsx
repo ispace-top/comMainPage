@@ -1,19 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Table, type TableColumn } from "@/components/ui/Table";
-import { Tag } from "@/components/ui/Tag";
-import { Switch } from "@/components/ui/Switch";
 import { Pagination } from "@/components/ui/Pagination";
 import { Badge } from "@/components/ui/Badge";
-
-const tabs = [
-  { key: "banner", label: "Banner" },
-  { key: "services", label: "服务项目" },
-  { key: "cases", label: "成功案例" },
-  { key: "articles", label: "行业洞察" },
-];
 
 type ContentRow = Record<string, unknown> & { id: number };
 
@@ -64,24 +56,20 @@ const columnsMap: Record<string, TableColumn<ContentRow>[]> = {
 };
 
 export default function ContentPage() {
-  const [activeTab, setActiveTab] = useState("banner");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") || "banner";
+  const activeTab = ["banner", "services", "cases", "articles"].includes(tabParam) ? tabParam : "banner";
   const [page, setPage] = useState(1);
 
   const data = mockData[activeTab] || [];
   const columns = columnsMap[activeTab] || [];
-  const totalLabel = { banner: "Banner", services: "服务项目", cases: "案例", articles: "文章" }[activeTab];
+
+  // Sidebar navigation drives tab switching via URL param — no need for in-page tabs
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold text-neutral-800 mb-2">内容中心</h1>
-      <p className="text-sm text-neutral-500 mb-6">管理 Banner、服务项目、成功案例和行业洞察内容。</p>
-
-      {/* Tabs */}
-      <div className="flex gap-1 bg-neutral-100 p-1 rounded-md mb-6 max-w-md">
-        {tabs.map(tab => (
-          <button key={tab.key} onClick={() => { setActiveTab(tab.key); setPage(1); }} className={["flex-1 py-2 px-3 text-sm font-semibold rounded-sm transition-colors", activeTab === tab.key ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50"].join(" ")}>{tab.label}</button>
-        ))}
-      </div>
+      <p className="text-sm text-neutral-600 mb-6">管理 Banner、服务项目、成功案例和行业洞察内容。</p>
 
       {/* Toolbar */}
       <div className="flex items-center justify-between mb-4">
@@ -93,7 +81,7 @@ export default function ContentPage() {
             <option>草稿</option>
           </select>
         </div>
-        <Button variant="primary" size="sm">+ 新建{totalLabel}</Button>
+        <Button variant="primary" size="sm">+ 新建</Button>
       </div>
 
       {/* Table */}

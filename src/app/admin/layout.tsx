@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 
@@ -13,7 +14,9 @@ export default function AdminRootLayout({ children }: { children: React.ReactNod
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <AdminLayout>{children}</AdminLayout>
+        <Suspense fallback={<div className="flex h-screen items-center justify-center text-neutral-400">加载中...</div>}>
+          <AdminLayout>{children}</AdminLayout>
+        </Suspense>
       </body>
     </html>
   );

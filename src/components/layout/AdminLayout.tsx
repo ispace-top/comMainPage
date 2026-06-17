@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ToastProvider } from "@/components/ui/Toast";
+import { isAuthenticated, logout as doLogout } from "@/lib/auth";
 
 const menuItems = [
   {
@@ -54,7 +55,35 @@ function MenuIcon({ name, active }: { name: string; active: boolean }) {
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated() && pathname !== "/admin/login") {
+      router.replace("/admin/login");
+    } else {
+      setAuthChecked(true);
+    }
+  }, [pathname, router]);
+
+  // Allow login page to render without auth check
+  if (pathname === "/admin/login") {
+    return <ToastProvider>{children}</ToastProvider>;
+  }
+
+  if (!authChecked) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-neutral-50">
+        <div className="size-8 animate-spin rounded-full border-2 border-neutral-200 border-t-primary-500" />
+      </div>
+    );
+  }
+
+  const handleLogout = () => {
+    doLogout();
+    router.replace("/admin/login");
+  };
 
   return (
     <ToastProvider>
@@ -119,6 +148,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             </h1>
             <div className="flex items-center gap-4">
               <span className="text-sm text-neutral-500">Admin</span>
+              <button
+                onClick={handleLogout}
+                className="text-sm text-neutral-400 hover:text-error-500 transition-colors"
+                title="退出登录"
+              >
+                退出
+              </button>
               <div className="size-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center text-sm font-medium">A</div>
             </div>
           </header>

@@ -194,6 +194,20 @@ function PushConfigTab() {
             placeholder="user1|user2|user3 (多个用竖线分隔)"
             hint="留空则发送给应用可见范围内的所有人"
           />
+          <div>
+            <label className="block mb-2 text-sm font-medium text-neutral-700">Markdown 消息模板</label>
+            <div className="bg-neutral-50 border border-neutral-200 rounded-sm p-4">
+              <pre className="text-xs text-neutral-600 whitespace-pre-wrap font-mono">{`{
+  "msgtype": "markdown",
+  "markdown": {
+    "content": "### 🔔 新认证咨询线索\\n> **客户姓名**: <font color=\\"info\\">{"{name}"}</font>\\n> **联系电话**: [{"{phone}"}](tel:{"{phone}"})\\n> **意向项目**: {"{service_name}"}\\n> **来源页面**: [{"{source_url}"}]({"{source_url}"})\\n\\n[👉 点击前往后台跟进]({"{admin_url}"})"
+  }
+}`}</pre>
+            </div>
+            <p className="mt-1.5 text-xs text-neutral-400">
+              支持变量: {"{name}"} {"{phone}"} {"{company}"} {"{service_name}"} {"{source_url}"} {"{admin_url}"}
+            </p>
+          </div>
         </div>
       )}
 

@@ -57,11 +57,15 @@ export function Navigation({ lang }: { lang: Lang }) {
     return pathWithoutLang.startsWith(hrefWithoutLang);
   };
 
+  // Only home page gets transparent nav (white text on hero gradient)
+  const isHomePage = pathname === `/${lang}` || pathname === `/${lang}/`;
+  const useLightNav = isScrolled || mobileOpen || !isHomePage;
+
   return (
     <header
       className={[
         "fixed top-0 left-0 right-0 z-[var(--z-sticky)] transition-all duration-300 ease-standard",
-        isScrolled || mobileOpen
+        useLightNav
           ? "bg-white shadow-lg border-b border-neutral-200"
           : "bg-transparent border-b border-transparent",
       ].join(" ")}
@@ -78,7 +82,7 @@ export function Navigation({ lang }: { lang: Lang }) {
           <span
             className={[
               "text-xl font-bold transition-colors",
-              isScrolled || mobileOpen ? "text-neutral-800" : "text-white",
+              useLightNav ? "text-neutral-800" : "text-white",
             ].join(" ")}
           >
             {lang === "zh" ? "认证通" : "Renzheng"}
@@ -98,7 +102,7 @@ export function Navigation({ lang }: { lang: Lang }) {
                 href={item.href}
                 className={[
                   "relative inline-flex items-center gap-1 text-base transition-colors duration-150 py-2",
-                  isScrolled
+                  useLightNav
                     ? isActive(item.href)
                       ? "text-neutral-800"
                       : "text-neutral-600 hover:text-primary-500"
@@ -146,7 +150,7 @@ export function Navigation({ lang }: { lang: Lang }) {
             href={`/${lang}/contact`}
             className={[
               "hidden lg:inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-md transition-all duration-150",
-              isScrolled
+              useLightNav
                 ? "bg-primary-500 text-white hover:bg-primary-600"
                 : "bg-white/15 text-white hover:bg-white/25 backdrop-blur-sm",
             ].join(" ")}

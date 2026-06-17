@@ -107,7 +107,7 @@ export default function ServicesPage() {
                 <h3 className="mt-4 text-xl font-semibold text-neutral-800 group-hover:text-primary-500 transition-colors">
                   {lang === "zh" ? info?.zh.title : info?.en.title}
                 </h3>
-                <p className="mt-2 text-sm text-neutral-500 line-clamp-2">
+                <p className="mt-2 text-sm text-neutral-600 line-clamp-2">
                   {lang === "zh" ? info?.zh.desc : info?.en.desc}
                 </p>
                 <span className="inline-flex items-center gap-1 mt-4 text-sm font-medium text-primary-500 group-hover:gap-2 transition-all">

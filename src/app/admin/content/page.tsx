@@ -79,7 +79,7 @@ export default function ContentPage() {
       {/* Tabs */}
       <div className="flex gap-1 bg-neutral-100 p-1 rounded-md mb-6 max-w-md">
         {tabs.map(tab => (
-          <button key={tab.key} onClick={() => { setActiveTab(tab.key); setPage(1); }} className={["flex-1 py-2 px-3 text-sm font-medium rounded-sm transition-colors", activeTab === tab.key ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-500 hover:text-neutral-700"].join(" ")}>{tab.label}</button>
+          <button key={tab.key} onClick={() => { setActiveTab(tab.key); setPage(1); }} className={["flex-1 py-2 px-3 text-sm font-semibold rounded-sm transition-colors", activeTab === tab.key ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50"].join(" ")}>{tab.label}</button>
         ))}
       </div>
 

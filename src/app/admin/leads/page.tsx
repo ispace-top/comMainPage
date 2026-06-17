@@ -75,7 +75,7 @@ function KanbanView() {
             {col.leads.map(lead => (
               <div key={lead.id} className={["bg-white border border-neutral-200 rounded-md p-4 cursor-pointer hover:shadow-sm transition-all border-l-4", col.color].join(" ")}>
                 <p className="font-semibold text-neutral-800">{lead.name}</p>
-                <p className="text-sm text-neutral-500 mt-1">{lead.company}</p>
+                <p className="text-sm text-neutral-600 mt-1">{lead.company}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-xs px-2 py-0.5 rounded-sm bg-primary-50 text-primary-600">{lead.service}</span>
                   <span className="text-xs text-neutral-400">{lead.time}</span>
@@ -99,12 +99,12 @@ export default function LeadsPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-neutral-800">线索中心</h1>
-          <p className="text-sm text-neutral-500 mt-1">管理客户留资数据，跟踪线索转化状态。</p>
+          <p className="text-sm text-neutral-600 mt-1">管理客户留资数据，跟踪线索转化状态。</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-neutral-100 rounded-md p-1">
             {(["list", "kanban"] as const).map(v => (
-              <button key={v} onClick={() => setView(v)} className={["py-1.5 px-3 text-xs font-medium rounded-sm transition-colors", view === v ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-500"].join(" ")}>
+              <button key={v} onClick={() => setView(v)} className={["py-1.5 px-3 text-xs font-semibold rounded-sm transition-colors", view === v ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-600 hover:text-neutral-800"].join(" ")}>
                 {v === "list" ? "列表" : "看板"}
               </button>
             ))}

@@ -13,7 +13,7 @@ const variantStyles: Record<NonNullable<TagProps["variant"]>, string> = {
   success: "bg-success-50 text-success-700",
   warning: "bg-warning-50 text-warning-700",
   error: "bg-error-50 text-error-700",
-  outline: "bg-transparent text-neutral-500 border border-neutral-300",
+  outline: "bg-transparent text-neutral-700 border border-neutral-300 hover:bg-neutral-50 hover:text-neutral-900",
 };
 
 const sizeStyles: Record<NonNullable<TagProps["size"]>, string> = {

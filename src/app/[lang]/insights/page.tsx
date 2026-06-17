@@ -85,7 +85,7 @@ export default function InsightsPage() {
                   <span className="px-2 py-0.5 rounded-sm bg-primary-50 text-primary-600 text-xs font-medium">{a.category}</span>
                 </div>
                 <h3 className="mt-3 text-lg font-semibold text-neutral-800 line-clamp-2 group-hover:text-primary-500 transition-colors">{lang === "zh" ? a.titleZh : a.titleEn}</h3>
-                <p className="mt-2 text-sm text-neutral-500 line-clamp-2">{lang === "zh" ? a.summaryZh : a.summaryEn}</p>
+                <p className="mt-2 text-sm text-neutral-600 line-clamp-2">{lang === "zh" ? a.summaryZh : a.summaryEn}</p>
               </div>
             </Link>
           ))}

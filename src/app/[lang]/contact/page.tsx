@@ -102,12 +102,20 @@ export default function ContactPage() {
               </div>
             </div>
 
-            {/* Map placeholder */}
-            <div className="bg-neutral-100 border border-neutral-200 rounded-lg h-[280px] flex items-center justify-center">
-              <div className="text-center text-neutral-400">
-                <svg className="size-12 mx-auto" viewBox="0 0 48 48" fill="currentColor"><path fillRule="evenodd" d="M24 4C16.28 4 10 10.28 10 18c0 10.5 14 26 14 26s14-15.5 14-26c0-7.72-6.28-14-14-14zm0 19a5 5 0 110-10 5 5 0 010 10z" clipRule="evenodd"/></svg>
-                <p className="mt-2 text-sm">{lang === "zh" ? "地图加载中..." : "Loading map..."}</p>
+            {/* Map */}
+            <div className="bg-neutral-100 border border-neutral-200 rounded-lg h-[280px] overflow-hidden relative">
+              <div className="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-400 text-sm z-0">
+                <span>{lang === "zh" ? "地图加载中..." : "Loading map..."}</span>
               </div>
+              <iframe
+                title={lang === "zh" ? "公司位置" : "Office Location"}
+                src="https://www.openstreetmap.org/export/embed.html?bbox=116.460%2C39.904%2C116.470%2C39.910&amp;layer=mapnik&amp;marker=39.907%2C116.465"
+                width="100%"
+                height="100%"
+                className="border-0 relative z-10"
+                loading="lazy"
+                allowFullScreen
+              />
             </div>
           </div>
         </div>

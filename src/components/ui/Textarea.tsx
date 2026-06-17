@@ -5,13 +5,14 @@ import { type TextareaHTMLAttributes, forwardRef } from "react";
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
+  hint?: string;
   required?: boolean;
   showCharCount?: boolean;
   maxLength?: number;
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ label, error, required, showCharCount, maxLength, className = "", id, value, ...props }, ref) => {
+  ({ label, error, hint, required, showCharCount, maxLength, className = "", id, value, ...props }, ref) => {
     const textareaId = id || label?.replace(/\s+/g, "-").toLowerCase();
     const charCount = typeof value === "string" ? value.length : 0;
     return (
@@ -46,6 +47,8 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <div className="flex justify-between mt-1.5">
           {error ? (
             <p className="text-xs text-error-500">{error}</p>
+          ) : hint ? (
+            <p className="text-xs text-neutral-400">{hint}</p>
           ) : (
             <span />
           )}

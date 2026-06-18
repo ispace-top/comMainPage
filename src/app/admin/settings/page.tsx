@@ -1,6 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
@@ -15,9 +27,53 @@ const tabs = [
   { key: "push", label: "推送配置" },
 ];
 
+const initialNavItems = [
+  { id: "home", label: "首页", href: "/" },
+  { id: "services", label: "认证服务", href: "/services" },
+  { id: "cases", label: "成功案例", href: "/cases" },
+  { id: "insights", label: "行业洞察", href: "/insights" },
+  { id: "about", label: "关于我们", href: "/about" },
+  { id: "contact", label: "联系我们", href: "/contact" },
+];
+
+function SortableNavItem({ id, label, href }: { id: string; label: string; href: string }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={[
+        "flex items-center gap-3 p-3 bg-neutral-50 rounded-md hover:bg-white border border-transparent hover:border-neutral-200 transition-colors group",
+        isDragging ? "shadow-lg bg-white border-primary-300 z-10" : "",
+      ].join(" ")}
+    >
+      <button {...attributes} {...listeners} className="text-neutral-400 hover:text-neutral-600 cursor-grab active:cursor-grabbing p-1" aria-label="拖拽排序">
+        <svg className="size-5" viewBox="0 0 20 20" fill="currentColor">
+          <circle cx="7" cy="4" r="1.5" /><circle cx="13" cy="4" r="1.5" />
+          <circle cx="7" cy="10" r="1.5" /><circle cx="13" cy="10" r="1.5" />
+          <circle cx="7" cy="16" r="1.5" /><circle cx="13" cy="16" r="1.5" />
+        </svg>
+      </button>
+      <span className="flex-1 text-sm font-medium text-neutral-700">{label}</span>
+      <span className="text-xs text-neutral-400 hidden group-hover:inline">{href}</span>
+      <div className="hidden group-hover:flex items-center gap-1">
+        <Button variant="tertiary" size="sm">编辑</Button>
+        <Button variant="tertiary" size="sm">删除</Button>
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("site");
   const [saving, setSaving] = useState(false);
+  const [navItems, setNavItems] = useState(initialNavItems);
   const { addToast } = useToast();
 
   const handleSave = async () => {
@@ -25,6 +81,17 @@ export default function SettingsPage() {
     await new Promise(r => setTimeout(r, 1000));
     setSaving(false);
     addToast("success", "设置已保存");
+  };
+
+  const handleNavDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setNavItems((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
   };
 
   return (
@@ -73,19 +140,17 @@ export default function SettingsPage() {
           )}
 
           {activeTab === "nav" && (
-            <div className="space-y-1">
-              {["首页", "认证服务", "成功案例", "行业洞察", "关于我们", "联系我们"].map((name, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-neutral-50 rounded-md hover:bg-white border border-transparent hover:border-neutral-200 transition-colors group">
-                  <span className="text-neutral-400 cursor-grab">⠿</span>
-                  <span className="flex-1 text-sm font-medium text-neutral-700">{name}</span>
-                  <span className="text-sm text-neutral-400">/{i === 0 ? "" : name.toLowerCase()}</span>
-                  <span className="px-2 py-0.5 text-xs rounded-full bg-success-50 text-success-700">已启用</span>
-                  <div className="hidden group-hover:flex gap-2">
-                    <Button variant="tertiary" size="sm">编辑</Button>
-                    <Button variant="tertiary" size="sm">删除</Button>
+            <div>
+              <p className="text-sm text-neutral-500 mb-4">拖拽调整导航菜单排序，悬停显示操作按钮。</p>
+              <DndContext collisionDetection={closestCenter} onDragEnd={handleNavDragEnd}>
+                <SortableContext items={navItems.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+                  <div className="space-y-1">
+                    {navItems.map((item) => (
+                      <SortableNavItem key={item.id} id={item.id} label={item.label} href={item.href} />
+                    ))}
                   </div>
-                </div>
-              ))}
+                </SortableContext>
+              </DndContext>
             </div>
           )}
 

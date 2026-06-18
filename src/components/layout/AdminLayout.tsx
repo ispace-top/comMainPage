@@ -4,17 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ToastProvider } from "@/components/ui/Toast";
-import { isAuthenticated, logout as doLogout } from "@/lib/auth";
+import { isAuthenticated, getAuthUser, logout as doLogout, type Role } from "@/lib/auth";
 
-const menuItems = [
+const allMenuItems = [
   {
     group: "概览",
+    roles: ["admin", "editor"] as Role[],
     items: [
       { label: "工作台", icon: "dashboard", href: "/admin" },
     ],
   },
   {
     group: "内容",
+    roles: ["admin", "editor"] as Role[],
     items: [
       { label: "Banner 管理", icon: "image", href: "/admin/content" },
       { label: "服务项目", icon: "briefcase", href: "/admin/content?tab=services" },
@@ -24,6 +26,7 @@ const menuItems = [
   },
   {
     group: "线索",
+    roles: ["admin", "editor"] as Role[],
     items: [
       { label: "线索列表", icon: "users", href: "/admin/leads" },
       { label: "看板视图", icon: "view-columns", href: "/admin/leads?view=kanban" },
@@ -31,6 +34,7 @@ const menuItems = [
   },
   {
     group: "系统",
+    roles: ["admin"] as Role[],
     items: [
       { label: "全局设置", icon: "cog", href: "/admin/settings" },
     ],
@@ -79,6 +83,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
+  const user = getAuthUser();
+  const userRole = user?.role || "admin";
+  const menuItems = allMenuItems.filter((g) => g.roles.includes(userRole));
 
   const handleLogout = () => {
     doLogout();
@@ -147,7 +155,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               {pathname === "/admin" ? "工作台" : pathname.includes("settings") ? "全局设置" : pathname.includes("content") ? "内容中心" : pathname.includes("leads") ? "线索中心" : "管理后台"}
             </h1>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-neutral-500">Admin</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600">
+                {userRole === "admin" ? "管理员" : "编辑员"}
+              </span>
+              <span className="text-sm text-neutral-500">{user?.username || "Admin"}</span>
               <button
                 onClick={handleLogout}
                 className="text-sm text-neutral-400 hover:text-error-500 transition-colors"

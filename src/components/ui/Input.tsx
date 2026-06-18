@@ -5,12 +5,13 @@ import { type InputHTMLAttributes, forwardRef } from "react";
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  success?: boolean;
   hint?: string;
   required?: boolean;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, hint, required, className = "", id, ...props }, ref) => {
+  ({ label, error, success, hint, required, className = "", id, ...props }, ref) => {
     const inputId = id || label?.replace(/\s+/g, "-").toLowerCase();
     return (
       <div className="w-full">
@@ -37,7 +38,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             "transition-all duration-150 ease-standard",
             error
               ? "border-error-500 shadow-[0_0_0_3px_rgba(220,38,38,0.15)]"
-              : "border-neutral-300 hover:border-neutral-400 focus:border-primary-500 focus:shadow-[0_0_0_3px_rgba(26,86,219,0.15)]",
+              : success
+                ? "border-success-500"
+                : "border-neutral-300 hover:border-neutral-400 focus:border-primary-500 focus:shadow-[0_0_0_3px_rgba(26,86,219,0.15)]",
             "disabled:bg-neutral-100 disabled:border-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed",
             "read-only:bg-neutral-50 read-only:border-neutral-200 read-only:cursor-default",
             className,

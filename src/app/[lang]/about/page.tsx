@@ -1,13 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { useParams } from "next/navigation";
 import type { Lang } from "@/components/ui/LanguageSwitcher";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { Modal } from "@/components/ui/Modal";
 import { useScrollReveal } from "@/lib/scroll-reveal";
 
 export default function AboutPage() {
   const params = useParams();
   const lang = (params?.lang as Lang) || "zh";
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   useScrollReveal();
 
   return (
@@ -49,12 +53,38 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-neutral-800 text-center">{lang === "zh" ? "资质证书" : "Certifications"}</h2>
           <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[1,2,3,4].map(i => (
-              <div key={i} className="aspect-[3/4] bg-neutral-50 border border-neutral-200 rounded-md flex items-center justify-center hover:shadow-sm cursor-pointer transition-all">
+              <div
+                key={i}
+                onClick={() => { setLightboxIndex(i - 1); setLightboxOpen(true); }}
+                className="aspect-[3/4] bg-neutral-50 border border-neutral-200 rounded-md flex items-center justify-center hover:shadow-sm cursor-pointer transition-all hover:border-primary-300"
+              >
                 <span className="text-sm text-neutral-400">{lang === "zh" ? "资质证书" : "Certificate"} {i}</span>
               </div>
             ))}
           </div>
         </section>
+
+        {/* Certificate Lightbox */}
+        <Modal
+          open={lightboxOpen}
+          onClose={() => setLightboxOpen(false)}
+          title={lang === "zh" ? `资质证书 ${lightboxIndex + 1}` : `Certificate ${lightboxIndex + 1}`}
+          size="lg"
+        >
+          <div className="flex items-center justify-center min-h-[300px] bg-neutral-50 rounded-md">
+            <div className="text-center">
+              <svg className="size-24 text-neutral-300 mx-auto" viewBox="0 0 96 96" fill="currentColor">
+                <rect x="12" y="8" width="72" height="80" rx="4" stroke="text-neutral-300" strokeWidth="2"/>
+                <circle cx="38" cy="36" r="10" />
+                <path d="M20 72h56" stroke="white" strokeWidth="4"/>
+                <path d="M32 60h32" stroke="white" strokeWidth="3"/>
+              </svg>
+              <p className="mt-4 text-neutral-500 text-sm">
+                {lang === "zh" ? "点击左右箭头浏览更多证书" : "Use arrow keys to browse certificates"}
+              </p>
+            </div>
+          </div>
+        </Modal>
 
         {/* Expert Team */}
         <section className="mt-20 reveal-on-scroll" id="team">

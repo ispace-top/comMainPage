@@ -129,18 +129,24 @@ export function Footer({ lang }: FooterProps) {
 
             {/* Social icons */}
             <div className="flex items-center gap-4 mt-6">
-              {["wechat", "weibo", "linkedin"].map((platform) => (
-                <a
-                  key={platform}
-                  href="#"
-                  className="text-neutral-400 hover:text-white transition-colors"
-                  aria-label={platform}
-                >
-                  <svg className="size-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM4.5 10a5.5 5.5 0 0111 0 5.5 5.5 0 01-11 0z" />
-                  </svg>
-                </a>
-              ))}
+              {/* WeChat */}
+              <a href="#" className="text-neutral-400 hover:text-white transition-colors" aria-label="WeChat">
+                <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8.5 11a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm5 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM12 2C6.48 2 2 6.06 2 11c0 2.76 1.38 5.24 3.54 6.86L5 21l3.67-2.45c.72.2 1.47.31 2.23.34.05.01.1.01.15.01C17.52 18.9 22 14.84 22 9.9 22 5.14 17.52 2 12 2zm5.8 8.8c0 3.37-3.36 6.1-7.5 6.1-.68 0-1.35-.08-2-.23l-2.1 1.4.5-2.1c-1.2-.9-1.9-2-1.9-3.17C4.8 9.43 8.16 6.7 12.3 6.7s7.5 2.73 7.5 6.1z"/>
+                </svg>
+              </a>
+              {/* Weibo */}
+              <a href="#" className="text-neutral-400 hover:text-white transition-colors" aria-label="Weibo">
+                <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3.5 7.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm-7 4c-1.93 0-3.5-1.57-3.5-3.5S6.57 6.5 8.5 6.5 12 8.07 12 10s-1.57 3.5-3.5 3.5zm6.5 4c-3.04 0-5.5-1.79-5.5-4s2.46-4 5.5-4 5.5 1.79 5.5 4-2.46 4-5.5 4z"/>
+                </svg>
+              </a>
+              {/* LinkedIn */}
+              <a href="#" className="text-neutral-400 hover:text-white transition-colors" aria-label="LinkedIn">
+                <svg className="size-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zm-.5 15.5v-5.3a3.26 3.26 0 00-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 011.4 1.4v4.93h2.79zM6.88 8.56a1.68 1.68 0 001.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 00-1.69 1.69c0 .93.76 1.68 1.69 1.68zm1.39 9.94v-8.37H5.5v8.37h2.77z"/>
+                </svg>
+              </a>
             </div>
           </div>
         </div>

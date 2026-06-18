@@ -58,7 +58,7 @@ export function Pagination({
             className={[
               "inline-flex items-center justify-center size-10 rounded-md text-sm font-medium transition-colors",
               page === current
-                ? "bg-primary-500 text-white"
+                ? "bg-primary-500 text-white font-semibold"
                 : "text-neutral-600 hover:bg-neutral-100",
             ].join(" ")}
             aria-current={page === current ? "page" : undefined}

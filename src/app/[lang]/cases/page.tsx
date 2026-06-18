@@ -4,17 +4,19 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { Lang } from "@/components/ui/LanguageSwitcher";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/Button";
 import { useScrollReveal } from "@/lib/scroll-reveal";
 
 const clients = ["Huawei", "CNPC", "Sinopec", "CRRC", "BYD", "Alibaba", "Tencent", "Midea", "Haier", "SANY", "GREE", "BAIC"];
 
 const cases = [
-  { client: "某大型制造集团", en: "Major Manufacturing Group", industry: "manufacturing", cert: "ISO9001", summaryZh: "通过ISO9001质量管理体系认证，客户产品合格率从92%提升至99.2%，年质量成本降低35%。", summaryEn: "Achieved ISO9001 certification; product pass rate improved from 92% to 99.2%, annual quality costs reduced by 35%." },
-  { client: "某化工企业", en: "Chemical Enterprise", industry: "chemical", cert: "ISO14001", summaryZh: "建立环境管理体系后，废水排放达标率100%，年能耗费降低28%，获得市级绿色工厂称号。", summaryEn: "After establishing an environmental management system, wastewater compliance reached 100%, energy costs dropped 28%." },
-  { client: "某建筑集团", en: "Construction Group", industry: "construction", cert: "ISO45001", summaryZh: "施工安全管理体系认证后，年工伤事故率下降76%，项目安全生产标准化达标率100%。", summaryEn: "After OH&S certification, annual workplace injury rate dropped 76%, safety compliance reached 100%." },
-  { client: "某食品公司", en: "Food Company", industry: "food", cert: "ISO22000", summaryZh: "食品安全管理体系助力企业通过沃尔玛全球采购审核，出口订单增长300%。", summaryEn: "Food safety management system helped pass Walmart Global Sourcing audit; export orders grew 300%." },
-  { client: "某汽车零部件厂", en: "Auto Parts Factory", industry: "auto", cert: "IATF 16949", summaryZh: "获得IATF认证后，成功进入奔驰、宝马等国际知名车企供应链体系。", summaryEn: "After IATF certification, successfully entered the supply chain of Mercedes-Benz, BMW, and other global automakers." },
-  { client: "某医疗器械公司", en: "Medical Device Company", industry: "medical", cert: "ISO13485", summaryZh: "医疗器械质量管理体系认证通过，产品获得欧盟CE认证，顺利出海欧洲市场。", summaryEn: "Passed medical device quality management certification; products obtained CE marking for the European market." },
+  { slug: "major-manufacturing", client: "某大型制造集团", en: "Major Manufacturing Group", industry: "manufacturing", cert: "ISO9001", summaryZh: "通过ISO9001质量管理体系认证，客户产品合格率从92%提升至99.2%，年质量成本降低35%。", summaryEn: "Achieved ISO9001 certification; product pass rate improved from 92% to 99.2%, annual quality costs reduced by 35%." },
+  { slug: "chemical-enterprise", client: "某化工企业", en: "Chemical Enterprise", industry: "chemical", cert: "ISO14001", summaryZh: "建立环境管理体系后，废水排放达标率100%，年能耗费降低28%，获得市级绿色工厂称号。", summaryEn: "After establishing an environmental management system, wastewater compliance reached 100%, energy costs dropped 28%." },
+  { slug: "construction-group", client: "某建筑集团", en: "Construction Group", industry: "construction", cert: "ISO45001", summaryZh: "施工安全管理体系认证后，年工伤事故率下降76%，项目安全生产标准化达标率100%。", summaryEn: "After OH&S certification, annual workplace injury rate dropped 76%, safety compliance reached 100%." },
+  { slug: "food-company", client: "某食品公司", en: "Food Company", industry: "food", cert: "ISO22000", summaryZh: "食品安全管理体系助力企业通过沃尔玛全球采购审核，出口订单增长300%。", summaryEn: "Food safety management system helped pass Walmart Global Sourcing audit; export orders grew 300%." },
+  { slug: "auto-parts", client: "某汽车零部件厂", en: "Auto Parts Factory", industry: "auto", cert: "IATF 16949", summaryZh: "获得IATF认证后，成功进入奔驰、宝马等国际知名车企供应链体系。", summaryEn: "After IATF certification, successfully entered the supply chain of Mercedes-Benz, BMW, and other global automakers." },
+  { slug: "medical-device", client: "某医疗器械公司", en: "Medical Device Company", industry: "medical", cert: "ISO13485", summaryZh: "医疗器械质量管理体系认证通过，产品获得欧盟CE认证，顺利出海欧洲市场。", summaryEn: "Passed medical device quality management certification; products obtained CE marking for the European market." },
 ];
 
 export default function CasesPage() {
@@ -39,6 +41,14 @@ export default function CasesPage() {
         </div>
 
         {/* Cases list */}
+        {cases.length === 0 ? (
+          <div className="mt-16">
+            <EmptyState
+              title={lang === "zh" ? "暂无成功案例" : "No Success Cases"}
+              description={lang === "zh" ? "精彩案例即将上线，敬请期待" : "Exciting cases coming soon"}
+            />
+          </div>
+        ) : (
         <div className="mt-16 space-y-8">
           {cases.map((c, i) => (
             <div key={i} className={`flex flex-col md:flex-row gap-8 p-6 bg-white border border-neutral-200 rounded-md shadow-xs hover:shadow-sm transition-all reveal-on-scroll ${i % 2 === 1 ? "md:flex-row-reverse" : ""}`}>
@@ -51,14 +61,15 @@ export default function CasesPage() {
                 <span className="text-xs font-medium text-primary-500 uppercase">{c.cert}</span>
                 <h3 className="mt-2 text-xl font-semibold text-neutral-800">{lang === "zh" ? c.client : c.en}</h3>
                 <p className="mt-3 text-base text-neutral-600">{lang === "zh" ? c.summaryZh : c.summaryEn}</p>
-                <span className="inline-flex items-center gap-1 mt-4 text-sm font-medium text-primary-500 hover:gap-2 transition-all cursor-pointer">
+                <Link href={`/${lang}/cases/${c.slug}`} className="inline-flex items-center gap-1 mt-4 text-sm font-medium text-primary-500 hover:gap-2 transition-all">
                   {lang === "zh" ? "查看详情" : "View Details"}
                   <svg className="size-4" viewBox="0 0 16 16" fill="currentColor"><path fillRule="evenodd" d="M6.22 4.22a.75.75 0 011.06 0l3.25 3.25a.75.75 0 010 1.06l-3.25 3.25a.75.75 0 01-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 010-1.06z" clipRule="evenodd" /></svg>
-                </span>
+                </Link>
               </div>
             </div>
           ))}
         </div>
+        )}
       </div>
     </div>
   );

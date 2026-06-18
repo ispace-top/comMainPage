@@ -23,7 +23,7 @@ const variantStyles: Record<ButtonVariant, string> = {
   accent:
     "bg-gradient-to-br from-accent-400 to-accent-500 text-white shadow-sm hover:from-accent-500 hover:to-accent-500 active:from-[#B45309] active:to-[#B45309] focus-visible:outline-2 focus-visible:outline-accent-400 disabled:opacity-40 disabled:cursor-not-allowed",
   danger:
-    "bg-error-500 text-white hover:bg-[#B91C1C] active:bg-[#991B1B] focus-visible:outline-2 focus-visible:outline-error-300 disabled:opacity-40 disabled:cursor-not-allowed",
+    "bg-error-500 text-white hover:bg-[#B91C1C] active:bg-[#991B1B] focus-visible:outline-2 focus-visible:outline-red-400 disabled:opacity-40 disabled:cursor-not-allowed",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -52,7 +52,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled || loading}
         className={[
-          "inline-flex items-center justify-center font-medium transition-all duration-150 ease-standard select-none",
+          "relative inline-flex items-center justify-center font-medium transition-all duration-150 ease-standard select-none",
           variantStyles[variant],
           sizeStyles[size],
           "min-w-[44px] min-h-[44px]", // touch target
@@ -60,36 +60,41 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ].join(" ")}
         {...props}
       >
-        {loading ? (
-          <svg
-            className="animate-spin shrink-0"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <circle
-              cx="8"
-              cy="8"
-              r="6"
-              stroke="currentColor"
-              strokeWidth="2"
-              opacity="0.3"
-            />
-            <path
-              d="M14 8a6 6 0 00-10.39-4.24"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        ) : icon && iconPosition === "left" ? (
-          <span className="shrink-0">{icon}</span>
-        ) : null}
-        {children}
-        {!loading && icon && iconPosition === "right" && (
-          <span className="shrink-0">{icon}</span>
+        {loading && (
+          <span className="absolute inset-0 flex items-center justify-center">
+            <svg
+              className="animate-spin shrink-0"
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+            >
+              <circle
+                cx="8"
+                cy="8"
+                r="6"
+                stroke="currentColor"
+                strokeWidth="2"
+                opacity="0.3"
+              />
+              <path
+                d="M14 8a6 6 0 00-10.39-4.24"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            </svg>
+          </span>
         )}
+        <span className={loading ? "invisible" : ""}>
+          {!loading && icon && iconPosition === "left" && (
+            <span className="shrink-0">{icon}</span>
+          )}
+          {children}
+          {!loading && icon && iconPosition === "right" && (
+            <span className="shrink-0">{icon}</span>
+          )}
+        </span>
       </button>
     );
   }

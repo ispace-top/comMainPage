@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { ToastProvider } from "@/components/ui/Toast";
+import { SetHtmlLang } from "@/components/layout/SetHtmlLang";
+import { HreflangTags } from "@/components/ui/HreflangTags";
 type LangType = "zh" | "en";
 const validLangs: LangType[] = ["zh", "en"];
 
@@ -53,8 +55,10 @@ export default async function LangLayout({
 
   return (
     <ToastProvider>
+      <SetHtmlLang lang={effectiveLang} />
+      <HreflangTags />
       <Navigation lang={effectiveLang} />
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">{children}</main>
       <Footer lang={effectiveLang} />
     </ToastProvider>
   );

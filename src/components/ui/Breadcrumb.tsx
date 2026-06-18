@@ -24,7 +24,7 @@ export function Breadcrumb({ items, className = "" }: BreadcrumbProps) {
                 </svg>
               )}
               {isLast ? (
-                <span className="font-semibold text-neutral-800">{item.label}</span>
+                <span className="text-base font-semibold text-neutral-800">{item.label}</span>
               ) : item.href ? (
                 <Link
                   href={item.href}

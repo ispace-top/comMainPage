@@ -7,6 +7,10 @@ import type { Lang } from "@/components/ui/LanguageSwitcher";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Tag } from "@/components/ui/Tag";
 import { Pagination } from "@/components/ui/Pagination";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/Button";
+import { PageSkeleton } from "@/components/ui/Loading";
+import { usePageData } from "@/lib/use-page-data";
 import { useScrollReveal } from "@/lib/scroll-reveal";
 
 const PAGE_SIZE = 9;
@@ -48,7 +52,29 @@ export default function ServicesPage() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [page, setPage] = useState(1);
 
+  const { loading, error, retry } = usePageData(
+    () => new Promise<void>((resolve) => setTimeout(resolve, 200))
+  );
+
   useScrollReveal();
+
+  if (error) {
+    return (
+      <div className="section-padding">
+        <div className="container-page">
+          <EmptyState
+            title={lang === "zh" ? "加载失败" : "Loading Failed"}
+            description={error}
+            action={<Button variant="secondary" size="md" onClick={retry}>{lang === "zh" ? "重新加载" : "Retry"}</Button>}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return <div className="section-padding"><div className="container-page"><PageSkeleton /></div></div>;
+  }
 
   const filtered = activeCategory === "all"
     ? allServices
@@ -94,6 +120,15 @@ export default function ServicesPage() {
         </div>
 
         {/* Services Grid */}
+        {paged.length === 0 ? (
+          <div className="mt-8">
+            <EmptyState
+              title={lang === "zh" ? "未找到相关服务" : "No Services Found"}
+              description={lang === "zh" ? "请尝试调整筛选条件" : "Try adjusting your filter criteria"}
+              action={<Button variant="secondary" size="sm" onClick={() => { setActiveCategory("all"); setPage(1); }}>{lang === "zh" ? "清除筛选" : "Clear Filter"}</Button>}
+            />
+          </div>
+        ) : (
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {paged.map((service) => {
             const info = serviceInfo[service.slug];
@@ -120,6 +155,7 @@ export default function ServicesPage() {
             );
           })}
         </div>
+        )}
 
         {/* Pagination */}
         <div className="mt-10">

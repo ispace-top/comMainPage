@@ -98,30 +98,57 @@ export function Navigation({ lang }: { lang: Lang }) {
               onMouseEnter={() => setHoveredMenu(item.href)}
               onMouseLeave={() => setHoveredMenu(null)}
             >
-              <Link
-                href={item.href}
-                className={[
-                  "relative inline-flex items-center gap-1 text-base transition-colors duration-150 py-2",
-                  useLightNav
-                    ? isActive(item.href)
-                      ? "text-neutral-800"
-                      : "text-neutral-600 hover:text-primary-500"
-                    : isActive(item.href)
-                      ? "text-white"
-                      : "text-white/85 hover:text-white",
-                ].join(" ")}
-              >
-                {item.label}
-                {item.children && (
+              {item.children ? (
+                <button
+                  onClick={() => setHoveredMenu(hoveredMenu === item.href ? null : item.href)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") setHoveredMenu(null);
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setHoveredMenu(hoveredMenu === item.href ? null : item.href);
+                    }
+                  }}
+                  aria-expanded={hoveredMenu === item.href}
+                  aria-haspopup="true"
+                  className={[
+                    "relative inline-flex items-center gap-1 text-base transition-colors duration-150 py-2 cursor-pointer bg-transparent border-0",
+                    useLightNav
+                      ? isActive(item.href)
+                        ? "text-neutral-800"
+                        : "text-neutral-600 hover:text-primary-500"
+                      : isActive(item.href)
+                        ? "text-white"
+                        : "text-white/85 hover:text-white",
+                  ].join(" ")}
+                >
+                  {item.label}
                   <svg className="size-4" viewBox="0 0 16 16" fill="currentColor">
                     <path fillRule="evenodd" d="M4.23 5.23a.75.75 0 011.06 0L8 7.94l2.71-2.71a.75.75 0 111.06 1.06l-3.25 3.25a.75.75 0 01-1.06 0L4.23 6.29a.75.75 0 010-1.06z" clipRule="evenodd" />
                   </svg>
-                )}
-                {/* Active indicator */}
-                {isActive(item.href) && (
-                  <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-500 rounded-full" />
-                )}
-              </Link>
+                  {isActive(item.href) && (
+                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-500 rounded-full" />
+                  )}
+                </button>
+              ) : (
+                <Link
+                  href={item.href}
+                  className={[
+                    "relative inline-flex items-center gap-1 text-base transition-colors duration-150 py-2",
+                    useLightNav
+                      ? isActive(item.href)
+                        ? "text-neutral-800"
+                        : "text-neutral-600 hover:text-primary-500"
+                      : isActive(item.href)
+                        ? "text-white"
+                        : "text-white/85 hover:text-white",
+                  ].join(" ")}
+                >
+                  {item.label}
+                  {isActive(item.href) && (
+                    <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary-500 rounded-full" />
+                  )}
+                </Link>
+              )}
               {/* Dropdown */}
               {item.children && hoveredMenu === item.href && (
                 <ul className="absolute top-full left-0 mt-0 bg-white border border-neutral-200 rounded-md shadow-md min-w-[180px] py-1">
@@ -129,6 +156,7 @@ export function Navigation({ lang }: { lang: Lang }) {
                     <li key={child.href}>
                       <Link
                         href={child.href}
+                        onClick={() => setHoveredMenu(null)}
                         className="block h-11 px-4 leading-[44px] text-[15px] text-neutral-600 hover:bg-neutral-100 transition-colors"
                       >
                         {child.label}

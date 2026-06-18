@@ -129,6 +129,37 @@ export default function ServiceDetailPage() {
 
   return (
     <div>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "Service",
+              name: t.title,
+              description: t.intro.slice(0, 200),
+              provider: {
+                "@type": "Organization",
+                name: lang === "zh" ? "认证通" : "Renzheng",
+              },
+              areaServed: { "@type": "Country", name: "China" },
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faqs.map((item) => ({
+                "@type": "Question",
+                name: item.q,
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text: item.a,
+                },
+              })),
+            },
+          ]),
+        }}
+      />
       {/* Hero section */}
       <div className="bg-neutral-50 border-b border-neutral-200">
         <div className="container-page py-12">

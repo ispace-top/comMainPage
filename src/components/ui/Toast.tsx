@@ -8,6 +8,7 @@ interface Toast {
   id: string;
   type: ToastType;
   message: string;
+  exiting?: boolean;
 }
 
 interface ToastContextValue {
@@ -26,22 +27,22 @@ export function useToast() {
 
 const iconMap: Record<ToastType, ReactNode> = {
   success: (
-    <svg className="size-5 text-success-500" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="size-5 text-success-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
     </svg>
   ),
   error: (
-    <svg className="size-5 text-error-500" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="size-5 text-error-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
     </svg>
   ),
   warning: (
-    <svg className="size-5 text-warning-500" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="size-5 text-warning-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-.75-11.25a.75.75 0 011.5 0v4.5a.75.75 0 01-1.5 0v-4.5zm.75 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
     </svg>
   ),
   info: (
-    <svg className="size-5 text-info-500" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="size-5 text-info-500 shrink-0" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1-9.25a.75.75 0 011.5 0v3.5a.75.75 0 01-1.5 0v-3.5zm1.75-2.5a.75.75 0 10-1.5 0 .75.75 0 001.5 0z" clipRule="evenodd" />
     </svg>
   ),
@@ -58,14 +59,20 @@ const autoCloseMs: Record<ToastType, number | null> = {
   success: 3000,
   info: 3000,
   warning: 5000,
-  error: null, // manual close only
+  error: null,
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const removeToast = useCallback((id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
+    // Start exit animation, then remove
+    setToasts((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, exiting: true } : t))
+    );
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 200);
   }, []);
 
   const addToast = useCallback(
@@ -83,9 +90,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
       {children}
-      {/* Toast container */}
+      {/* Toast container with aria-live for screen readers */}
       <div
-        className="fixed z-[var(--z-toast)] flex flex-col gap-2 pointer-events-none"
+        aria-live="polite"
+        aria-atomic="false"
+        className="fixed z-[var(--z-toast)] flex flex-col gap-2 pointer-events-none max-md:left-1/2 max-md:-translate-x-1/2 max-md:top-4 max-md:right-auto max-md:min-w-[320px] max-md:max-w-[90vw]"
         style={{
           top: 24,
           right: 24,
@@ -99,15 +108,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className={[
               "pointer-events-auto flex items-start gap-3 p-4 bg-white rounded-md shadow-lg border-l-4",
               barColor[toast.type],
-              "animate-[toastIn_300ms_ease-out]",
+              toast.exiting
+                ? "animate-[toastOut_200ms_ease-in]"
+                : "animate-[toastIn_300ms_ease-out]",
             ].join(" ")}
           >
-            <span className="shrink-0 mt-0.5">{iconMap[toast.type]}</span>
+            {iconMap[toast.type]}
             <p className="flex-1 text-sm text-neutral-700">{toast.message}</p>
             <button
               onClick={() => removeToast(toast.id)}
               className="shrink-0 p-0.5 text-neutral-400 hover:text-neutral-600 rounded transition-colors"
-              aria-label="关闭"
+              aria-label="关闭通知"
             >
               <svg className="size-4" viewBox="0 0 16 16" fill="currentColor">
                 <path d="M4.97 4.97a.75.75 0 011.06 0L8 6.94l1.97-1.97a.75.75 0 111.06 1.06L9.06 8l1.97 1.97a.75.75 0 11-1.06 1.06L8 9.06l-1.97 1.97a.75.75 0 01-1.06-1.06L6.94 8 4.97 6.03a.75.75 0 010-1.06z" />

@@ -46,14 +46,51 @@ export function Select({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const listRef = useRef<HTMLUListElement>(null);
+
   useEffect(() => {
     if (!isOpen) return;
+    // Focus the first selected or first option
+    const selectedIdx = options.findIndex((o) => o.value === value);
+    const focusIdx = selectedIdx >= 0 ? selectedIdx : 0;
+    setTimeout(() => {
+      const items = listRef.current?.querySelectorAll<HTMLElement>("[role=option]");
+      items?.[focusIdx]?.focus();
+    }, 50);
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsOpen(false);
+      if (e.key === "Escape") {
+        setIsOpen(false);
+        return;
+      }
+      const items = listRef.current?.querySelectorAll<HTMLElement>("[role=option]");
+      if (!items || items.length === 0) return;
+      const currentIdx = Array.from(items).findIndex(
+        (el) => el === document.activeElement
+      );
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const next = currentIdx < items.length - 1 ? currentIdx + 1 : 0;
+        items[next].focus();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const prev = currentIdx > 0 ? currentIdx - 1 : items.length - 1;
+        items[prev].focus();
+      } else if (e.key === "Home") {
+        e.preventDefault();
+        items[0].focus();
+      } else if (e.key === "End") {
+        e.preventDefault();
+        items[items.length - 1].focus();
+      } else if (e.key === "Enter" && currentIdx >= 0) {
+        e.preventDefault();
+        onChange?.(options[currentIdx].value);
+        setIsOpen(false);
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen]);
+  }, [isOpen, options, value, onChange]);
 
   return (
     <div className="w-full" ref={containerRef}>
@@ -77,7 +114,7 @@ export function Select({
           "disabled:bg-neutral-100 disabled:border-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed",
           error
             ? "border-error-500 shadow-[0_0_0_3px_rgba(220,38,38,0.15)]"
-            : "border-neutral-300 hover:border-neutral-400 focus:outline-none focus:border-primary-500 focus:shadow-[0_0_0_3px_rgba(26,86,219,0.15)]",
+            : "border-neutral-300 hover:border-neutral-400 focus:border-primary-500 focus:shadow-[0_0_0_3px_rgba(26,86,219,0.15)]",
           className,
         ].join(" ")}
       >
@@ -102,6 +139,7 @@ export function Select({
       {isOpen && !disabled && (
         <div className="relative z-[var(--z-dropdown)]">
           <ul
+            ref={listRef}
             className="absolute top-1 left-0 right-0 bg-white border border-neutral-200 rounded-md shadow-md overflow-auto max-h-[300px] py-1"
             role="listbox"
           >
@@ -109,13 +147,15 @@ export function Select({
               <li
                 key={option.value}
                 role="option"
+                tabIndex={-1}
                 aria-selected={option.value === value}
                 onClick={() => {
                   onChange?.(option.value);
                   setIsOpen(false);
                 }}
                 className={[
-                  "h-10 px-4 flex items-center text-sm cursor-pointer transition-colors",
+                  "h-10 px-4 flex items-center text-sm cursor-pointer transition-colors outline-none",
+                  "focus:bg-neutral-100",
                   option.value === value
                     ? "bg-primary-50 text-primary-600 font-medium"
                     : "text-neutral-600 hover:bg-neutral-100",

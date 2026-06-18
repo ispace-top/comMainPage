@@ -7,10 +7,15 @@ import type { Lang } from "@/components/ui/LanguageSwitcher";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Tag } from "@/components/ui/Tag";
 import { Pagination } from "@/components/ui/Pagination";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Button } from "@/components/ui/Button";
 import { useScrollReveal } from "@/lib/scroll-reveal";
+
+const articleSlugs = ["iso9001-2025", "digital-certification", "small-business-iso", "iso14001-guide", "audit-nonconformity", "digital-cert-management", "food-safety-update", "ohs-case-study", "mutual-recognition"];
 
 const articles = Array.from({ length: 9 }, (_, i) => ({
   id: i + 1,
+  slug: articleSlugs[i],
   category: ["policy", "trends", "knowledge"][i % 3],
   date: `2026-0${6 - Math.floor(i / 3)}-${String(10 + i).padStart(2, "0")}`,
   titleZh: [
@@ -73,9 +78,18 @@ export default function InsightsPage() {
           ))}
         </div>
 
+        {paged.length === 0 ? (
+          <div className="mt-8">
+            <EmptyState
+              title={lang === "zh" ? "未找到相关文章" : "No Articles Found"}
+              description={lang === "zh" ? "请尝试调整筛选条件" : "Try adjusting your filter criteria"}
+              action={<Button variant="secondary" size="sm" onClick={() => { setCat("all"); setPage(1); }}>{lang === "zh" ? "清除筛选" : "Clear Filter"}</Button>}
+            />
+          </div>
+        ) : (
         <div className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {paged.map((a, i) => (
-            <Link key={a.id} href={`/${lang}/insights/${a.id}`} className="group block bg-white border border-neutral-200 rounded-md overflow-hidden shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 reveal-on-scroll" style={{ transitionDelay: `${i * 80}ms` }}>
+            <Link key={a.id} href={`/${lang}/insights/${a.slug}`} className="group block bg-white border border-neutral-200 rounded-md overflow-hidden shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 reveal-on-scroll" style={{ transitionDelay: `${i * 80}ms` }}>
               <div className="aspect-video bg-neutral-100 flex items-center justify-center">
                 <svg className="size-12 text-neutral-300" viewBox="0 0 48 48" fill="currentColor"><rect x="6" y="8" width="36" height="32" rx="2"/><circle cx="16" cy="18" r="3" fill="white" opacity="0.5"/><path d="M6 28h36" stroke="white" strokeWidth="2"/></svg>
               </div>
@@ -90,6 +104,7 @@ export default function InsightsPage() {
             </Link>
           ))}
         </div>
+        )}
 
         <div className="mt-10">
           <Pagination current={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={setPage} />

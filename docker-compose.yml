@@ -1,0 +1,12 @@
+services:
+  web:
+    build: .
+    image: wapedk/zhengyuan-website:latest
+    container_name: zhengyuan-website
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production

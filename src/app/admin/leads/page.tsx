@@ -243,7 +243,7 @@ export default function LeadsPage() {
             {loading ? (
               <p className="text-sm text-neutral-400 text-center py-12">加载中...</p>
             ) : filtered.length > 0 ? (
-              <Table columns={columns} data={filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)} rowKey={(r) => r.id} />
+              <Table columns={columns as any} data={filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) as any} rowKey={(r: any) => r.id} />
             ) : (
               <p className="text-sm text-neutral-400 text-center py-12">暂无线索数据</p>
             )}
@@ -313,7 +313,7 @@ export default function LeadsPage() {
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400">来源页面</p>
-                  <p className="text-sm text-primary-500 mt-0.5">{detailLead.source_url || detailLead.sourceUrl}</p>
+                  <p className="text-sm text-primary-500 mt-0.5">{(detailLead as any).source_url}</p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400">提交时间</p>

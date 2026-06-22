@@ -67,7 +67,7 @@ export default function DashboardPage() {
           </Link>
         </div>
         {leads.length > 0 ? (
-          <Table columns={columns} data={leads} rowKey={(r) => r.id} />
+          <Table columns={columns as any} data={leads as any} rowKey={(r: any) => r.id} />
         ) : (
           <p className="text-sm text-neutral-400 text-center py-8">{loading ? "加载中..." : "暂无线索数据"}</p>
         )}

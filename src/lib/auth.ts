@@ -3,12 +3,6 @@
 const AUTH_KEY = "admin_auth_token";
 const USER_KEY = "admin_user_info";
 
-// Demo credentials
-const DEMO_USERS: Record<string, { password: string; role: "admin" | "editor" }> = {
-  admin: { password: "admin123", role: "admin" },
-  editor: { password: "editor123", role: "editor" },
-};
-
 export interface AuthUser {
   username: string;
   role: "admin" | "editor";
@@ -16,16 +10,22 @@ export interface AuthUser {
 
 export type Role = "admin" | "editor";
 
-export function login(username: string, password: string): AuthUser | null {
-  const user = DEMO_USERS[username];
-  if (user && user.password === password) {
-    const token = btoa(`${username}:${Date.now()}`);
-    localStorage.setItem(AUTH_KEY, token);
-    const authUser: AuthUser = { username, role: user.role };
+export async function login(username: string, password: string): Promise<AuthUser | null> {
+  try {
+    const res = await fetch("/api/admin/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const authUser: AuthUser = { username: data.username, role: data.role };
+    localStorage.setItem(AUTH_KEY, data.token);
     localStorage.setItem(USER_KEY, JSON.stringify(authUser));
     return authUser;
+  } catch {
+    return null;
   }
-  return null;
 }
 
 export function logout(): void {
@@ -43,7 +43,7 @@ export function getAuthUser(): AuthUser | null {
   try {
     const stored = localStorage.getItem(USER_KEY);
     if (stored) return JSON.parse(stored) as AuthUser;
-  } catch { /* fallback to admin */ }
+  } catch { /* fallback */ }
   return { username: "admin", role: "admin" };
 }
 

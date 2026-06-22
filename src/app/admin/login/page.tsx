@@ -30,9 +30,7 @@ export default function AdminLoginPage() {
       return;
     }
     setLoading(true);
-    // Simulate network delay
-    await new Promise((r) => setTimeout(r, 800));
-    const user = login(username, password);
+    const user = await login(username, password);
     setLoading(false);
     if (user) {
       router.replace("/admin");
@@ -100,7 +98,7 @@ export default function AdminLoginPage() {
           </form>
 
           <p className="text-xs text-neutral-400 text-center mt-6">
-            演示账号: admin / admin123
+            请在环境变量中配置登录凭据
           </p>
         </div>
       </div>

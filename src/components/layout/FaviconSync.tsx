@@ -8,21 +8,18 @@ import { useEffect } from "react";
  */
 export function FaviconSync() {
   useEffect(() => {
+    let cancelled = false;
     fetch("/api/admin/settings")
       .then((r) => r.json())
       .then((settings) => {
+        if (cancelled) return;
         if (settings.logoUrl && settings.logoUrl.startsWith("data:image")) {
-          // Remove all existing icon links
-          document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach((el) => { try { el.remove(); } catch {} });
-          // Create new favicon link with uploaded logo
-          const link = document.createElement("link");
-          link.rel = "icon";
-          link.type = "image/png";
-          link.href = settings.logoUrl;
-          document.head.appendChild(link);
+          const existing = document.querySelector("link[rel='icon']");
+          if (existing) existing.setAttribute("href", settings.logoUrl);
         }
       })
       .catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   return null;

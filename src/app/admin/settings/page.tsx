@@ -25,6 +25,7 @@ const tabs = [
   { key: "seo", label: "SEO 配置" },
   { key: "nav", label: "导航管理" },
   { key: "push", label: "推送配置" },
+  { key: "account", label: "账号安全" },
 ];
 
 function SortableNavItem({ id, label, href }: { id: string; label: string; href: string }) {
@@ -235,6 +236,7 @@ export default function SettingsPage() {
           )}
 
           {activeTab === "push" && <PushConfigTab settings={pushSettings} onChange={setPushSettings} />}
+          {activeTab === "account" && <AccountTab />}
         </div>
 
         {/* Bottom action bar */}
@@ -392,6 +394,71 @@ function PushConfigTab({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+/** Password change form — overrides env defaults, persists to SQLite */
+function AccountTab() {
+  const [username, setUsername] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [saving, setSaving] = useState(false);
+  const { addToast } = useToast();
+
+  useEffect(() => {
+    try {
+      const user = JSON.parse(localStorage.getItem("admin_user_info") || "{}");
+      setUsername(user.username || "admin");
+    } catch { setUsername("admin"); }
+  }, []);
+
+  const handleChangePassword = async () => {
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      addToast("error", "请填写所有字段"); return;
+    }
+    if (newPassword !== confirmPassword) {
+      addToast("error", "两次输入的新密码不一致"); return;
+    }
+    if (newPassword.length < 6) {
+      addToast("error", "新密码至少6位"); return;
+    }
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/auth/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        addToast("success", "密码已修改，下次登录生效");
+        setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+      } else {
+        addToast("error", data.error || "修改失败");
+      }
+    } catch {
+      addToast("error", "网络错误");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h3 className="text-base font-semibold text-neutral-800">修改密码</h3>
+        <p className="text-sm text-neutral-500 mt-1">
+          当前账号: <strong>{username}</strong>。密码修改后持久化到数据库，覆盖环境变量默认值。
+        </p>
+      </div>
+      <Input label="当前密码" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="请输入当前密码" />
+      <Input label="新密码" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="至少6位" />
+      <Input label="确认新密码" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="再次输入新密码" />
+      <div className="flex justify-end">
+        <Button variant="primary" loading={saving} onClick={handleChangePassword}>修改密码</Button>
+      </div>
     </div>
   );
 }

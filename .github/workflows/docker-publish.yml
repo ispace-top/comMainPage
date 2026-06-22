@@ -1,11 +1,8 @@
 name: Docker Build and Publish
 
 on:
-  push:
-    branches: [main, develop]
-    tags: ["v*"]
-  pull_request:
-    branches: [main]
+  release:
+    types: [published]
 
 env:
   IMAGE_NAME: wapedk/zhengyuan-website
@@ -36,18 +33,16 @@ jobs:
         with:
           images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha,format=short
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{major}}
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha

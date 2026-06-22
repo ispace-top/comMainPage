@@ -1,7 +1,7 @@
 services:
   web:
     build: .
-    image: wapedkj/zhengyuan-website:latest
+    image: wapedkj/cms-web:latest
     container_name: cms-web
     restart: unless-stopped
     ports:

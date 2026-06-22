@@ -5,7 +5,7 @@ on:
     types: [published]
 
 env:
-  DOCKERHUB_REPO: wapedkj/zhengyuan-website
+  DOCKERHUB_REPO: wapedkj/cms-web
 
 permissions:
   contents: write

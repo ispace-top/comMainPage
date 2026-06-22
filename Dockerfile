@@ -2,11 +2,14 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Install build tools for better-sqlite3 native module
-RUN apk add --no-cache build-base python3
+# Install build tools for better-sqlite3 native module compilation
+RUN apk add --no-cache build-base python3 py3-setuptools
+
+# Prefer prebuilt binaries; fall back to source compile
+ENV npm_config_build_from_source=false
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm install --legacy-peer-deps --no-audit --no-fund --ignore-scripts=false
 
 COPY . .
 RUN npm run build

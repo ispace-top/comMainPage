@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { AdminLayout } from "@/components/layout/AdminLayout";
 
 export const metadata: Metadata = {
-  title: "管理后台 | 认证通",
+  title: "管理后台 | 正远智汇",
   robots: { index: false, follow: false },
 };
 

@@ -1,10 +1,13 @@
 import type { Lang } from "@/components/ui/LanguageSwitcher";
 
+interface StepData { step?: string; title: string; desc: string; }
+
 interface ProcessSectionProps {
   lang: Lang;
+  data?: { zh?: StepData[]; en?: StepData[] };
 }
 
-const content = {
+const stepDefaults: Record<string, { title: string; subtitle: string; steps: StepData[] }> = {
   zh: {
     title: "认证流程",
     subtitle: "简单四步，开启企业标准化认证之旅",
@@ -44,8 +47,9 @@ const stepIcons = [
   </svg>,
 ];
 
-export function ProcessSection({ lang }: ProcessSectionProps) {
-  const t = content[lang];
+export function ProcessSection({ lang, data }: ProcessSectionProps) {
+  const d = data?.[lang];
+  const t = { ...stepDefaults[lang], steps: d || stepDefaults[lang].steps };
   return (
     <section className="section-padding bg-neutral-50">
       <div className="container-page">

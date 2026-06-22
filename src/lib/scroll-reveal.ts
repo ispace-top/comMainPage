@@ -1,10 +1,22 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-/** Initialize IntersectionObserver-based scroll reveal */
-export function useScrollReveal() {
+/**
+ * Initialize IntersectionObserver-based scroll reveal.
+ * @param ready - When false, skips observation (useful when content hasn't loaded yet)
+ */
+export function useScrollReveal(ready = true) {
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
   useEffect(() => {
+    if (!ready) return;
+
+    // Clean up previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -20,9 +32,17 @@ export function useScrollReveal() {
       }
     );
 
-    const elements = document.querySelectorAll(".reveal-on-scroll");
-    elements.forEach((el) => observer.observe(el));
+    observerRef.current = observer;
 
-    return () => observer.disconnect();
-  }, []);
+    // Small delay to ensure DOM has rendered
+    const timer = setTimeout(() => {
+      const elements = document.querySelectorAll(".reveal-on-scroll");
+      elements.forEach((el) => observer.observe(el));
+    }, 50);
+
+    return () => {
+      clearTimeout(timer);
+      observer.disconnect();
+    };
+  }, [ready]);
 }

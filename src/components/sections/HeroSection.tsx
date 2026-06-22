@@ -1,41 +1,40 @@
 import Link from "next/link";
 import type { Lang } from "@/components/ui/LanguageSwitcher";
+import { langPath } from "@/lib/i18n";
 
 interface HeroSectionProps {
   lang: Lang;
+  data?: { zh?: { title?: string; subtitle?: string; cta1?: string; cta2?: string }; en?: { title?: string; subtitle?: string; cta1?: string; cta2?: string } };
 }
 
-const content = {
+const defaults = {
   zh: {
     title: "助力企业标准化建设\n迈向国际认证新高度",
-    subtitle:
-      "专注 ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务，以专业团队和卓越通过率，为企业构建可信任的管理体系。",
+    subtitle: "专注 ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务，以专业团队和卓越通过率，为企业构建可信任的管理体系。",
     ctaPrimary: "免费获取认证方案",
     ctaSecondary: "了解服务详情",
-    stat1: "10+",
-    stat1Label: "年行业经验",
-    stat2: "500+",
-    stat2Label: "服务企业",
-    stat3: "98%",
-    stat3Label: "认证通过率",
   },
   en: {
     title: "Empower Your Business\nwith International Standards",
-    subtitle:
-      "Specialized in ISO9001, ISO14001, ISO45001 certification consulting. Build trusted management systems with our expert team and proven success rate.",
+    subtitle: "Specialized in ISO9001, ISO14001, ISO45001 certification consulting. Build trusted management systems with our expert team and proven success rate.",
     ctaPrimary: "Get Free Consultation",
     ctaSecondary: "Our Services",
-    stat1: "10+",
-    stat1Label: "Years Experience",
-    stat2: "500+",
-    stat2Label: "Enterprises Served",
-    stat3: "98%",
-    stat3Label: "Success Rate",
   },
 };
 
-export function HeroSection({ lang }: HeroSectionProps) {
-  const t = content[lang];
+const statDefaults = {
+  zh: [{ num: "10+", label: "年行业经验" }, { num: "500+", label: "服务企业" }, { num: "98%", label: "认证通过率" }],
+  en: [{ num: "10+", label: "Years Experience" }, { num: "500+", label: "Enterprises Served" }, { num: "98%", label: "Success Rate" }],
+};
+
+export function HeroSection({ lang, data }: HeroSectionProps) {
+  const d = data?.[lang] || {};
+  const t = {
+    title: d.title || defaults[lang].title,
+    subtitle: d.subtitle || defaults[lang].subtitle,
+    ctaPrimary: d.cta1 || defaults[lang].ctaPrimary,
+    ctaSecondary: d.cta2 || defaults[lang].ctaSecondary,
+  };
 
   return (
     <section
@@ -64,13 +63,13 @@ export function HeroSection({ lang }: HeroSectionProps) {
             </p>
             <div className="flex flex-wrap gap-4 mt-8 animate-[fadeSlideIn_600ms_ease-out_300ms] [animation-fill-mode:backwards] max-lg:justify-center">
               <Link
-                href={`/${lang}/contact`}
+                href={langPath(lang, "/contact")}
                 className="inline-flex items-center justify-center h-13 px-8 text-lg font-medium rounded-md bg-gradient-to-br from-accent-400 to-accent-500 text-white shadow-sm hover:shadow-md transition-all duration-200"
               >
                 {t.ctaPrimary}
               </Link>
               <Link
-                href={`/${lang}/services`}
+                href={langPath(lang, "/services")}
                 className="inline-flex items-center justify-center h-13 px-8 text-lg font-medium rounded-md border-1.5 border-white/30 text-white hover:bg-white/10 transition-all duration-200"
               >
                 {t.ctaSecondary}
@@ -79,11 +78,7 @@ export function HeroSection({ lang }: HeroSectionProps) {
 
             {/* Trust indicators */}
             <div className="flex items-center gap-8 mt-10 animate-[fadeSlideIn_600ms_ease-out_450ms] [animation-fill-mode:backwards] max-lg:justify-center">
-              {[
-                { num: t.stat1, label: t.stat1Label },
-                { num: t.stat2, label: t.stat2Label },
-                { num: t.stat3, label: t.stat3Label },
-              ].map((stat, i) => (
+              {statDefaults[lang].map((stat, i) => (
                 <div key={i} className="flex items-center gap-8">
                   {i > 0 && <div className="w-px h-8 bg-white/20" />}
                   <div>
@@ -98,17 +93,13 @@ export function HeroSection({ lang }: HeroSectionProps) {
           {/* Right illustration */}
           <div className="hidden lg:flex items-center justify-center animate-[fadeScaleIn_800ms_ease-out_200ms] [animation-fill-mode:backwards]">
             <div className="relative w-full max-w-[500px] aspect-square">
-              <div className="absolute inset-0 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20" />
-              <div className="absolute inset-4 rounded-xl bg-white/5 flex items-center justify-center">
-                <svg className="w-3/4 h-3/4 text-white/60" viewBox="0 0 200 200" fill="none">
-                  {/* Certificate illustration */}
-                  <rect x="30" y="20" width="140" height="160" rx="8" stroke="currentColor" strokeWidth="3" />
-                  <circle cx="100" cy="75" r="20" stroke="currentColor" strokeWidth="3" />
-                  <path d="M95 75l4 4 8-8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                  <rect x="55" y="110" width="90" height="6" rx="3" fill="currentColor" opacity="0.5" />
-                  <rect x="55" y="125" width="70" height="6" rx="3" fill="currentColor" opacity="0.3" />
-                  <rect x="55" y="140" width="50" height="6" rx="3" fill="currentColor" opacity="0.2" />
-                </svg>
+              <div className="absolute inset-0 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 overflow-hidden">
+                <img
+                  src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=500&h=500&fit=crop&q=80"
+                  alt="ISO Certification"
+                  className="w-full h-full object-cover opacity-40 mix-blend-overlay"
+                  loading="lazy"
+                />
               </div>
               {/* Floating elements */}
               <div className="absolute -top-4 -right-4 size-16 rounded-xl bg-accent-400/80 shadow-lg flex items-center justify-center">

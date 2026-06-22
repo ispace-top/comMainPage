@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import type { Lang } from "@/components/ui/LanguageSwitcher";
+import { langPath } from "@/lib/i18n";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -122,8 +123,8 @@ export default function ServiceDetailPage() {
   };
 
   const breadcrumbItems = [
-    { label: lang === "zh" ? "首页" : "Home", href: `/${lang}` },
-    { label: lang === "zh" ? "认证服务" : "Services", href: `/${lang}/services` },
+    { label: lang === "zh" ? "首页" : "Home", href: langPath(lang, "/") },
+    { label: lang === "zh" ? "认证服务" : "Services", href: langPath(lang, "/services") },
     { label: t.titleEn },
   ];
 
@@ -141,7 +142,7 @@ export default function ServiceDetailPage() {
               description: t.intro.slice(0, 200),
               provider: {
                 "@type": "Organization",
-                name: lang === "zh" ? "认证通" : "Renzheng",
+                name: lang === "zh" ? "正远智汇" : "Renzheng",
               },
               areaServed: { "@type": "Country", name: "China" },
             },
@@ -250,7 +251,7 @@ export default function ServiceDetailPage() {
                 {["iso-14001", "iso-45001", "iso-27001"].filter(s => s !== slug).map((s) => (
                   <Link
                     key={s}
-                    href={`/${lang}/services/${s}`}
+                    href={langPath(lang, `/services/${s}`)}
                     className="block p-4 border border-neutral-200 rounded-md hover:border-primary-300 hover:shadow-sm transition-all"
                   >
                     <p className="font-medium text-neutral-800 text-sm">{s.toUpperCase()}</p>
@@ -315,7 +316,7 @@ export default function ServiceDetailPage() {
                     label={
                       <span>
                         {lang === "zh" ? "我已阅读并同意" : "I have read and agree to the"}{" "}
-                        <Link href={`/${lang}/about`} className="text-primary-500 underline" target="_blank">
+                        <Link href={langPath(lang, "/about")} className="text-primary-500 underline" target="_blank">
                           {lang === "zh" ? "《隐私政策》" : "Privacy Policy"}
                         </Link>
                       </span>

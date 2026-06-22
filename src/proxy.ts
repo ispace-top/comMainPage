@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const locales = ["zh", "en"];
-const defaultLocale = "zh";
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -19,17 +16,22 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if the path already has a locale
-  const pathnameHasLocale = locales.some(
-    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
-  );
+  // Redirect /zh/* → /* (permanent, Chinese is the default with no prefix)
+  if (pathname === "/zh" || pathname.startsWith("/zh/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname.replace(/^\/zh/, "") || "/";
+    return NextResponse.redirect(url, 308);
+  }
 
-  if (pathnameHasLocale) return NextResponse.next();
+  // /en/* paths pass through to [lang] route
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    return NextResponse.next();
+  }
 
-  // Redirect to default locale
+  // All other paths → internally rewrite to /zh/* so [lang] route matches
   const url = request.nextUrl.clone();
-  url.pathname = `/${defaultLocale}${pathname}`;
-  return NextResponse.redirect(url, 308);
+  url.pathname = `/zh${pathname}`;
+  return NextResponse.rewrite(url);
 }
 
 export const config = {

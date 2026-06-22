@@ -7,6 +7,7 @@ import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/Button";
 import type { Lang } from "@/components/ui/LanguageSwitcher";
+import { langPath } from "@/lib/i18n";
 
 export default function NotFound() {
   const pathname = usePathname();
@@ -18,7 +19,7 @@ export default function NotFound() {
 
   useEffect(() => {
     if (pathname?.startsWith("/en")) setLang("en");
-    else if (pathname?.startsWith("/zh")) setLang("zh");
+    else setLang("zh");
   }, [pathname]);
 
   return (
@@ -33,7 +34,7 @@ export default function NotFound() {
           <p className="text-neutral-500 mb-8">
             {lang === "zh" ? "您访问的页面不存在或已被移除。" : "The page you are looking for does not exist or has been removed."}
           </p>
-          <Link href={`/${lang}`}>
+          <Link href={langPath(lang, "/")}>
             <Button variant="primary" size="md">
               {lang === "zh" ? "返回首页" : "Back to Home"}
             </Button>

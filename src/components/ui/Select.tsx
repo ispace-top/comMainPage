@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 
 interface SelectOption {
   value: string;
@@ -32,7 +32,8 @@ export function Select({
 }: SelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-  const selectId = `select-${Math.random().toString(36).slice(2, 8)}`;
+  const reactId = useId();
+  const selectId = `select-${reactId}`;
 
   const selectedOption = options.find((o) => o.value === value);
 

@@ -6,6 +6,7 @@ import type { Lang } from "@/components/ui/LanguageSwitcher";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Modal } from "@/components/ui/Modal";
 import { useScrollReveal } from "@/lib/scroll-reveal";
+import { langPath } from "@/lib/i18n";
 
 export default function AboutPage() {
   const params = useParams();
@@ -25,16 +26,16 @@ export default function AboutPage() {
       </div>
 
       <div className="container-page py-16 max-md:py-12">
-        <Breadcrumb items={[{ label: lang === "zh" ? "首页" : "Home", href: `/${lang}` }, { label: lang === "zh" ? "关于我们" : "About" }]} className="mb-8" />
+        <Breadcrumb items={[{ label: lang === "zh" ? "首页" : "Home", href: langPath(lang, "/") }, { label: lang === "zh" ? "关于我们" : "About" }]} className="mb-8" />
 
         {/* Company Intro */}
         <section className="grid md:grid-cols-2 gap-10 items-center reveal-on-scroll">
           <div>
             <h2 className="text-3xl font-bold text-neutral-800">{lang === "zh" ? "公司简介" : "Company Profile"}</h2>
-            <p className="mt-4 text-base text-neutral-600 leading-relaxed">{lang === "zh" ? "认证通是国内领先的企业认证咨询服务提供商，成立于2015年，总部位于北京。我们汇聚了一批由资深ISO认证审核员、行业专家组成的专业团队，致力于为各类企业提供全方位、一站式的国际标准认证咨询服务。10余年来，我们已成功服务500+企业客户，覆盖制造、化工、建筑、食品、IT等30+行业，保持着98%的认证一次性通过率。" : "Renzheng is a leading enterprise certification consulting provider in China, founded in 2015 and headquartered in Beijing. We bring together a team of senior ISO auditors and industry experts, dedicated to providing comprehensive one-stop international standard certification consulting services. Over 10 years, we have successfully served 500+ enterprise clients across 30+ industries, maintaining a 98% first-time certification pass rate."}</p>
+            <p className="mt-4 text-base text-neutral-600 leading-relaxed">{lang === "zh" ? "北京正远智汇科技有限公司是国内领先的 ISO 认证咨询服务提供商，成立于2015年，总部位于北京密云。我们汇聚了一批由资深 ISO 认证审核员、行业专家组成的专业团队，致力于为各类企业提供全方位、一站式的国际标准认证咨询服务。10余年来，我们已成功服务 500+ 企业客户，覆盖制造、化工、建筑、食品、IT 等 30+ 行业，保持着 98% 的认证一次性通过率。" : "Beijing Zhengyuan Zhihui Technology Co., Ltd. is a leading ISO certification consulting provider in China, founded in 2015 and headquartered in Beijing Miyun. We bring together a team of senior ISO auditors and industry experts, dedicated to providing comprehensive one-stop international standard certification consulting services. Over 10 years, we have successfully served 500+ enterprise clients across 30+ industries, maintaining a 98% first-time certification pass rate."}</p>
           </div>
           <div className="aspect-[4/3] bg-neutral-100 rounded-lg flex items-center justify-center">
-            <svg className="size-20 text-neutral-300" viewBox="0 0 80 80" fill="currentColor"><rect x="10" y="12" width="60" height="56" rx="4"/><circle cx="40" cy="35" r="12"/><path d="M22 64h36" stroke="white" strokeWidth="4"/></svg>
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80" alt="正远智汇办公室" className="w-full h-full object-cover rounded-lg" loading="lazy" />
           </div>
         </section>
 
@@ -73,12 +74,7 @@ export default function AboutPage() {
         >
           <div className="flex items-center justify-center min-h-[300px] bg-neutral-50 rounded-md">
             <div className="text-center">
-              <svg className="size-24 text-neutral-300 mx-auto" viewBox="0 0 96 96" fill="currentColor">
-                <rect x="12" y="8" width="72" height="80" rx="4" stroke="text-neutral-300" strokeWidth="2"/>
-                <circle cx="38" cy="36" r="10" />
-                <path d="M20 72h56" stroke="white" strokeWidth="4"/>
-                <path d="M32 60h32" stroke="white" strokeWidth="3"/>
-              </svg>
+              <img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=600&q=80" alt="认证证书" className="w-full h-full object-contain rounded-md" loading="lazy" />
               <p className="mt-4 text-neutral-500 text-sm">
                 {lang === "zh" ? "点击左右箭头浏览更多证书" : "Use arrow keys to browse certificates"}
               </p>
@@ -98,7 +94,7 @@ export default function AboutPage() {
             ].map((person, i) => (
               <div key={i} className="text-center p-6 bg-white border border-neutral-200 rounded-md hover:shadow-sm transition-all">
                 <div className="size-28 rounded-full bg-neutral-100 mx-auto flex items-center justify-center">
-                  <svg className="size-12 text-neutral-300" viewBox="0 0 48 48" fill="currentColor"><circle cx="24" cy="18" r="8"/><path d="M12 42c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="currentColor" strokeWidth="3"/></svg>
+                  <img src={`https://images.unsplash.com/photo-${["1507003211169-0a1dd7228f2d","1494790108377-be9c29b29330","1472099645785-5658abf4ff4e","1438761681033-6461ffad8d80"][i]}?w=112&h=112&fit=crop&q=80`} alt={lang === "zh" ? person.zh : person.en} className="size-28 rounded-full object-cover" loading="lazy" />
                 </div>
                 <h3 className="mt-4 text-lg font-semibold text-neutral-800">{lang === "zh" ? person.zh : person.en}</h3>
                 <p className="text-sm text-primary-500 mt-1">{lang === "zh" ? person.roleZh : person.roleEn}</p>
@@ -114,7 +110,7 @@ export default function AboutPage() {
           <div className="mt-10 max-w-[800px] mx-auto relative">
             <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-primary-200 -translate-x-1/2 max-md:left-4" />
             {[
-              { year: "2015", zh: "认证通在北京成立，创始团队5人", en: "Founded in Beijing with a team of 5" },
+              { year: "2015", zh: "正远智汇在北京成立，创始团队5人", en: "Founded in Beijing with a team of 5" },
               { year: "2017", zh: "累计服务客户突破100家", en: "Surpassed 100 enterprise clients" },
               { year: "2019", zh: "成立上海、广州分公司", en: "Opened Shanghai & Guangzhou offices" },
               { year: "2021", zh: "累计服务客户突破300家", en: "Surpassed 300 enterprise clients" },

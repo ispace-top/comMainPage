@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LanguageSwitcher, type Lang } from "@/components/ui/LanguageSwitcher";
+import { langPath } from "@/lib/i18n";
 
 interface NavItem {
   label: string;
@@ -17,22 +18,30 @@ export function Navigation({ lang }: { lang: Lang }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedChild, setExpandedChild] = useState<string | null>(null);
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+  const [logoUrl, setLogoUrl] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); })
+      .catch(() => {});
+  }, []);
 
   const navItems: NavItem[] = [
-    { label: lang === "zh" ? "首页" : "Home", href: `/${lang}` },
-    { label: lang === "zh" ? "认证服务" : "Services", href: `/${lang}/services` },
-    { label: lang === "zh" ? "成功案例" : "Cases", href: `/${lang}/cases` },
-    { label: lang === "zh" ? "行业洞察" : "Insights", href: `/${lang}/insights` },
+    { label: lang === "zh" ? "首页" : "Home", href: langPath(lang, "/") },
+    { label: lang === "zh" ? "认证服务" : "Services", href: langPath(lang, "/services") },
+    { label: lang === "zh" ? "成功案例" : "Cases", href: langPath(lang, "/cases") },
+    { label: lang === "zh" ? "行业洞察" : "Insights", href: langPath(lang, "/insights") },
     {
       label: lang === "zh" ? "关于我们" : "About",
-      href: `/${lang}/about`,
+      href: langPath(lang, "/about"),
       children: [
-        { label: lang === "zh" ? "公司简介" : "Company", href: `/${lang}/about` },
-        { label: lang === "zh" ? "专家团队" : "Team", href: `/${lang}/about#team` },
-        { label: lang === "zh" ? "发展历程" : "History", href: `/${lang}/about#history` },
+        { label: lang === "zh" ? "公司简介" : "Company", href: langPath(lang, "/about") },
+        { label: lang === "zh" ? "专家团队" : "Team", href: langPath(lang, "/about#team") },
+        { label: lang === "zh" ? "发展历程" : "History", href: langPath(lang, "/about#history") },
       ],
     },
-    { label: lang === "zh" ? "联系我们" : "Contact", href: `/${lang}/contact` },
+    { label: lang === "zh" ? "联系我们" : "Contact", href: langPath(lang, "/contact") },
   ];
 
   useEffect(() => {
@@ -51,14 +60,19 @@ export function Navigation({ lang }: { lang: Lang }) {
   }, [mobileOpen]);
 
   const isActive = (href: string) => {
-    const pathWithoutLang = pathname.replace(`/${lang}`, "") || "/";
-    const hrefWithoutLang = href.replace(`/${lang}`, "");
-    if (hrefWithoutLang === "/") return pathWithoutLang === "/";
-    return pathWithoutLang.startsWith(hrefWithoutLang);
+    // Strip locale prefix from both pathname and href for comparison
+    const stripLocale = (p: string) => {
+      if (p.startsWith("/en")) return p.replace(/^\/en/, "") || "/";
+      return p;
+    };
+    const pathClean = stripLocale(pathname) || "/";
+    const hrefClean = stripLocale(href);
+    if (hrefClean === "/") return pathClean === "/";
+    return pathClean.startsWith(hrefClean);
   };
 
   // Only home page gets transparent nav (white text on hero gradient)
-  const isHomePage = pathname === `/${lang}` || pathname === `/${lang}/`;
+  const isHomePage = pathname === "/" || pathname === "/en" || pathname === "/en/";
   const useLightNav = isScrolled || mobileOpen || !isHomePage;
 
   return (
@@ -73,19 +87,23 @@ export function Navigation({ lang }: { lang: Lang }) {
       <div className="container-page flex items-center h-[72px] max-md:h-[60px]">
         {/* Logo */}
         <Link
-          href={`/${lang}`}
+          href={langPath(lang, "/")}
           className="flex items-center gap-2.5 shrink-0 mr-10"
         >
-          <div className="flex items-center justify-center size-10 rounded-md bg-primary-500">
-            <span className="text-white font-bold text-lg">R</span>
-          </div>
+          {logoUrl ? (
+            <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain" />
+          ) : (
+            <div className="flex items-center justify-center size-10 rounded-md bg-primary-500">
+              <span className="text-white font-bold text-lg">正</span>
+            </div>
+          )}
           <span
             className={[
               "text-xl font-bold transition-colors",
               useLightNav ? "text-neutral-800" : "text-white",
             ].join(" ")}
           >
-            {lang === "zh" ? "认证通" : "Renzheng"}
+            {lang === "zh" ? "正远智汇" : "ZhengyuanZhihui"}
           </span>
         </Link>
 
@@ -175,7 +193,7 @@ export function Navigation({ lang }: { lang: Lang }) {
             <LanguageSwitcher currentLang={lang} variant="desktop" />
           </div>
           <Link
-            href={`/${lang}/contact`}
+            href={langPath(lang, "/contact")}
             className={[
               "hidden lg:inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-md transition-all duration-150",
               useLightNav
@@ -293,7 +311,7 @@ export function Navigation({ lang }: { lang: Lang }) {
         <div className="px-4 pb-6 border-t border-neutral-200 pt-4 space-y-4">
           <LanguageSwitcher currentLang={lang} variant="mobile" />
           <Link
-            href={`/${lang}/contact`}
+            href={langPath(lang, "/contact")}
             onClick={() => setMobileOpen(false)}
             className="flex items-center justify-center h-11 w-full rounded-md bg-primary-500 text-white font-medium text-base"
           >

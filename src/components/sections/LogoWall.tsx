@@ -2,20 +2,21 @@ import type { Lang } from "@/components/ui/LanguageSwitcher";
 
 interface LogoWallProps {
   lang: Lang;
+  data?: { zh?: { title?: string; subtitle?: string }; en?: { title?: string; subtitle?: string } };
 }
 
-// Mock client logos — in production these would come from CMS
 const clientNames = [
   "Huawei", "CNPC", "Sinopec", "CRRC", "COMAC",
   "BYD", "Alibaba", "Tencent", "BOE", "Midea",
   "Haier", "SANY",
 ];
 
-export function LogoWall({ lang }: LogoWallProps) {
-  const title = lang === "zh" ? "他们信任我们" : "They Trust Us";
-  const subtitle = lang === "zh"
-    ? "数百家行业领先企业选择认证通作为认证合作伙伴"
-    : "Hundreds of industry leaders choose Renzheng as their certification partner";
+export function LogoWall({ lang, data }: LogoWallProps) {
+  const d = data?.[lang] || {};
+  const title = d.title || (lang === "zh" ? "他们信任我们" : "They Trust Us");
+  const subtitle = d.subtitle || (lang === "zh"
+    ? "数百家行业领先企业选择正远智汇作为认证合作伙伴"
+    : "Hundreds of industry leaders choose ZhengyuanZhihui as their certification partner");
   const statLabel1 = lang === "zh" ? "服务企业" : "Enterprises Served";
   const statLabel2 = lang === "zh" ? "认证通过率" : "Success Rate";
   const statLabel3 = lang === "zh" ? "行业覆盖" : "Industries Covered";

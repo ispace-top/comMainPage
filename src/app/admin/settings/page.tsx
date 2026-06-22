@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   DndContext,
   closestCenter,
@@ -17,23 +17,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 import { Switch } from "@/components/ui/Switch";
-import { Tag } from "@/components/ui/Tag";
 import { useToast } from "@/components/ui/Toast";
+import { fetchAllSettings, saveSettings, type NavItem } from "@/lib/admin-store";
 
 const tabs = [
   { key: "site", label: "站点信息" },
   { key: "seo", label: "SEO 配置" },
   { key: "nav", label: "导航管理" },
   { key: "push", label: "推送配置" },
-];
-
-const initialNavItems = [
-  { id: "home", label: "首页", href: "/" },
-  { id: "services", label: "认证服务", href: "/services" },
-  { id: "cases", label: "成功案例", href: "/cases" },
-  { id: "insights", label: "行业洞察", href: "/insights" },
-  { id: "about", label: "关于我们", href: "/about" },
-  { id: "contact", label: "联系我们", href: "/contact" },
 ];
 
 function SortableNavItem({ id, label, href }: { id: string; label: string; href: string }) {
@@ -73,14 +64,65 @@ function SortableNavItem({ id, label, href }: { id: string; label: string; href:
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("site");
   const [saving, setSaving] = useState(false);
-  const [navItems, setNavItems] = useState(initialNavItems);
+  const [loading, setLoading] = useState(true);
   const { addToast } = useToast();
+
+  // Form state
+  const [siteName, setSiteName] = useState("");
+  const [siteSubtitle, setSiteSubtitle] = useState("");
+  const [siteDescription, setSiteDescription] = useState("");
+  const [homeTitle, setHomeTitle] = useState("");
+  const [homeDescription, setHomeDescription] = useState("");
+  const [keywords, setKeywords] = useState("");
+  const [enableJsonLd, setEnableJsonLd] = useState(true);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [navItems, setNavItems] = useState<NavItem[]>([]);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  // Push config state
+  const [pushSettings, setPushSettings] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetchAllSettings()
+      .then((settings) => {
+        setSiteName(settings.siteName || "");
+        setSiteSubtitle(settings.siteSubtitle || "");
+        setSiteDescription(settings.siteDescription || "");
+        setLogoUrl(settings.logoUrl || "");
+        setHomeTitle(settings.homeTitle || "");
+        setHomeDescription(settings.homeDescription || "");
+        setKeywords(settings.keywords || "");
+        setEnableJsonLd(settings.enableJsonLd !== "false");
+        try { setNavItems(JSON.parse(settings.navItems || "[]")); } catch { setNavItems([]); }
+        setPushSettings(settings);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise(r => setTimeout(r, 1000));
-    setSaving(false);
-    addToast("success", "设置已保存");
+    try {
+      const data: Record<string, string> = {
+        siteName,
+        siteSubtitle,
+        siteDescription,
+        logoUrl,
+        homeTitle,
+        homeDescription,
+        keywords,
+        enableJsonLd: String(enableJsonLd),
+        navItems: JSON.stringify(navItems),
+        pushSettings: pushSettings.pushSettings || "{}",
+      };
+      await saveSettings(data);
+      addToast("success", "设置已保存");
+    } catch (e) {
+      console.error(e);
+      addToast("error", "保存失败");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleNavDragEnd = (event: DragEndEvent) => {
@@ -94,11 +136,19 @@ export default function SettingsPage() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="p-6">
+        <p className="text-sm text-neutral-400">加载设置中...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-neutral-800 mb-2">全局设置</h1>
-        <p className="text-sm text-neutral-500 mb-8">管理站点基础信息、SEO配置、导航菜单和推送通知渠道。</p>
+        <p className="text-sm text-neutral-500 mb-8">管理站点基础信息、SEO配置、导航菜单和推送通知渠道。数据存储在服务端 SQLite 数据库中。</p>
 
         {/* Tabs */}
         <div className="flex gap-1 bg-neutral-100 p-1 rounded-md mb-8">
@@ -117,25 +167,55 @@ export default function SettingsPage() {
         <div className="bg-white border border-neutral-200 rounded-md p-6">
           {activeTab === "site" && (
             <div className="space-y-5">
-              <Input label="站点名称" defaultValue="认证通" />
-              <Input label="站点副标题" defaultValue="专业企业认证服务" />
-              <Textarea label="站点简介" defaultValue="认证通为企业提供ISO9001等国际标准认证咨询服务。" />
+              <Input label="站点名称" value={siteName} onChange={(e) => setSiteName(e.target.value)} />
+              <Input label="站点副标题" value={siteSubtitle} onChange={(e) => setSiteSubtitle(e.target.value)} />
+              <Textarea label="站点简介" value={siteDescription} onChange={(e) => setSiteDescription(e.target.value)} />
               <div>
                 <label className="block mb-2 text-sm font-medium text-neutral-700">站点 Logo</label>
                 <div className="flex items-center gap-4">
-                  <div className="size-16 bg-neutral-100 rounded-md flex items-center justify-center text-neutral-400 text-xs">Logo</div>
-                  <Button variant="secondary" size="sm">上传 Logo</Button>
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="Logo" className="size-16 rounded-md object-contain border border-neutral-200" />
+                  ) : (
+                    <div className="size-16 bg-neutral-100 rounded-md flex items-center justify-center text-neutral-400 text-xs">Logo</div>
+                  )}
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onload = () => {
+                        setLogoUrl(reader.result as string);
+                        addToast("success", "图片已选择，点击下方「保存设置」生效");
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <Button variant="secondary" size="sm" onClick={() => logoInputRef.current?.click()}>
+                      {logoUrl ? "更换 Logo" : "上传 Logo"}
+                    </Button>
+                    {logoUrl && (
+                      <Button variant="tertiary" size="sm" onClick={() => setLogoUrl("")}>
+                        移除
+                      </Button>
+                    )}
+                  </div>
                 </div>
+                <p className="mt-2 text-xs text-neutral-400">建议尺寸 200×60px，支持 PNG/JPG/SVG，透明背景最佳。</p>
               </div>
             </div>
           )}
 
           {activeTab === "seo" && (
             <div className="space-y-5">
-              <Input label="首页标题 (Title)" defaultValue="认证通 — 专业企业认证服务" />
-              <Textarea label="首页描述 (Description)" defaultValue="认证通为企业提供ISO9001等国际标准认证咨询服务。" />
-              <Input label="关键词 (Keywords)" defaultValue="ISO9001,ISO14001,企业认证" />
-              <Switch checked={true} onChange={() => {}} label="启用 JSON-LD 结构化数据" />
+              <Input label="首页标题 (Title)" value={homeTitle} onChange={(e) => setHomeTitle(e.target.value)} />
+              <Textarea label="首页描述 (Description)" value={homeDescription} onChange={(e) => setHomeDescription(e.target.value)} />
+              <Input label="关键词 (Keywords)" value={keywords} onChange={(e) => setKeywords(e.target.value)} />
+              <Switch checked={enableJsonLd} onChange={setEnableJsonLd} label="启用 JSON-LD 结构化数据" />
             </div>
           )}
 
@@ -154,7 +234,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {activeTab === "push" && <PushConfigTab />}
+          {activeTab === "push" && <PushConfigTab settings={pushSettings} onChange={setPushSettings} />}
         </div>
 
         {/* Bottom action bar */}
@@ -168,9 +248,32 @@ export default function SettingsPage() {
 }
 
 /** Push configuration with sub-tabs for each channel type */
-function PushConfigTab() {
+function PushConfigTab({
+  settings,
+  onChange,
+}: {
+  settings: Record<string, string>;
+  onChange: (s: Record<string, string>) => void;
+}) {
   const [subTab, setSubTab] = useState<"wework-bot" | "wework-webhook" | "email">("wework-bot");
-  const tabs: { key: typeof subTab; label: string }[] = [
+
+  const push = (() => {
+    try { return JSON.parse(settings.pushSettings || "{}"); } catch { return {}; }
+  })();
+
+  const updatePush = (path: string, value: unknown) => {
+    const keys = path.split(".");
+    const next = JSON.parse(JSON.stringify(push));
+    let obj = next;
+    for (let i = 0; i < keys.length - 1; i++) {
+      if (!obj[keys[i]]) obj[keys[i]] = {};
+      obj = obj[keys[i]];
+    }
+    obj[keys[keys.length - 1]] = value;
+    onChange({ ...settings, pushSettings: JSON.stringify(next) });
+  };
+
+  const subTabs: { key: typeof subTab; label: string }[] = [
     { key: "wework-bot", label: "企微机器人" },
     { key: "wework-webhook", label: "企微 Webhook" },
     { key: "email", label: "邮件通知" },
@@ -178,17 +281,14 @@ function PushConfigTab() {
 
   return (
     <div className="space-y-6">
-      {/* Sub-tabs */}
       <div className="flex gap-1 bg-neutral-100 p-1 rounded-md max-w-sm">
-        {tabs.map((t) => (
+        {subTabs.map((t) => (
           <button
             key={t.key}
             onClick={() => setSubTab(t.key)}
             className={[
               "flex-1 py-2 px-3 text-sm font-semibold rounded-sm transition-colors",
-              subTab === t.key
-                ? "bg-white text-neutral-800 shadow-xs"
-                : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50",
+              subTab === t.key ? "bg-white text-neutral-800 shadow-xs" : "text-neutral-600 hover:text-neutral-800 hover:bg-neutral-50",
             ].join(" ")}
           >
             {t.label}
@@ -196,7 +296,6 @@ function PushConfigTab() {
         ))}
       </div>
 
-      {/* 企微机器人 */}
       {subTab === "wework-bot" && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
@@ -204,121 +303,89 @@ function PushConfigTab() {
               <h3 className="text-base font-semibold text-neutral-800">企业微信机器人</h3>
               <p className="text-sm text-neutral-600 mt-0.5">通过企微群机器人推送 Markdown 格式的线索通知到指定群聊。</p>
             </div>
-            <Switch checked={true} onChange={() => {}} label="启用" />
+            <Switch checked={push.weworkBot?.enabled ?? false} onChange={(v) => updatePush("weworkBot.enabled", v)} label="启用" />
           </div>
           <Input
             label="机器人 Webhook URL"
             type="url"
+            value={push.weworkBot?.webhookUrl || ""}
+            onChange={(e) => updatePush("weworkBot.webhookUrl", e.target.value)}
             placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxxxx"
             hint="在企微群聊中添加机器人后获取此地址"
           />
           <div>
             <label className="block mb-2 text-sm font-medium text-neutral-700">Markdown 消息模板</label>
-            <div className="bg-neutral-50 border border-neutral-200 rounded-sm p-4">
-              <pre className="text-xs text-neutral-600 whitespace-pre-wrap font-mono">{`### 🔔 新认证咨询线索
-> **客户姓名**: <font color="info">{"{name}"}</font>
-> **联系电话**: [{"{phone}"}](tel:{"{phone}"})
-> **意向项目**: {"{service_name}"}
-> **来源页面**: [{"{source_url}"}]({"{source_url}"})
-
-[👉 点击前往后台跟进]({"{admin_url}"})`}</pre>
-            </div>
-            <p className="mt-1.5 text-xs text-neutral-400">
-              支持变量: {"{name}"} {"{phone}"} {"{company}"} {"{service_name}"} {"{source_url}"} {"{admin_url}"}
-            </p>
+            <Textarea
+              value={push.weworkBot?.template || ""}
+              onChange={(e) => updatePush("weworkBot.template", e.target.value)}
+              rows={6}
+              hint='支持变量: {name} {phone} {company} {service_name} {source_url} {admin_url}'
+            />
           </div>
         </div>
       )}
 
-      {/* 企微 Webhook */}
       {subTab === "wework-webhook" && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-semibold text-neutral-800">企业微信 Webhook</h3>
-              <p className="text-sm text-neutral-600 mt-0.5">通过企微应用消息 API 发送通知，支持更灵活的消息类型。</p>
+              <p className="text-sm text-neutral-600 mt-0.5">通过企微应用消息 API 发送通知。</p>
             </div>
-            <Switch checked={false} onChange={() => {}} label="启用" />
+            <Switch checked={push.weworkWebhook?.enabled ?? false} onChange={(v) => updatePush("weworkWebhook.enabled", v)} label="启用" />
           </div>
-          <Input
-            label="Corp ID (企业ID)"
-            placeholder="wwxxxxxxxxxxxxxxxx"
-          />
-          <Input
-            label="Corp Secret (应用密钥)"
-            type="password"
-            placeholder="••••••••••••••••"
-          />
-          <Input
-            label="Agent ID (应用编号)"
-            type="number"
-            placeholder="1000001"
-          />
-          <Input
-            label="接收人 UserID"
-            placeholder="user1|user2|user3 (多个用竖线分隔)"
-            hint="留空则发送给应用可见范围内的所有人"
-          />
-          <div>
-            <label className="block mb-2 text-sm font-medium text-neutral-700">Markdown 消息模板</label>
-            <div className="bg-neutral-50 border border-neutral-200 rounded-sm p-4">
-              <pre className="text-xs text-neutral-600 whitespace-pre-wrap font-mono">{`{
-  "msgtype": "markdown",
-  "markdown": {
-    "content": "### 🔔 新认证咨询线索\\n> **客户姓名**: <font color=\\"info\\">{"{name}"}</font>\\n> **联系电话**: [{"{phone}"}](tel:{"{phone}"})\\n> **意向项目**: {"{service_name}"}\\n> **来源页面**: [{"{source_url}"}]({"{source_url}"})\\n\\n[👉 点击前往后台跟进]({"{admin_url}"})"
-  }
-}`}</pre>
-            </div>
-            <p className="mt-1.5 text-xs text-neutral-400">
-              支持变量: {"{name}"} {"{phone}"} {"{company}"} {"{service_name}"} {"{source_url}"} {"{admin_url}"}
-            </p>
-          </div>
+          <Input label="Corp ID (企业ID)" value={push.weworkWebhook?.corpId || ""} onChange={(e) => updatePush("weworkWebhook.corpId", e.target.value)} placeholder="wwxxxxxxxxxxxxxxxx" />
+          <Input label="Corp Secret (应用密钥)" type="password" value={push.weworkWebhook?.corpSecret || ""} onChange={(e) => updatePush("weworkWebhook.corpSecret", e.target.value)} placeholder="••••••••••••••••" />
+          <Input label="Agent ID (应用编号)" type="number" value={push.weworkWebhook?.agentId || ""} onChange={(e) => updatePush("weworkWebhook.agentId", e.target.value)} placeholder="1000001" />
+          <Input label="接收人 UserID" value={push.weworkWebhook?.toUser || ""} onChange={(e) => updatePush("weworkWebhook.toUser", e.target.value)} placeholder="user1|user2|user3" hint="留空则发送给应用可见范围内的所有人" />
+          <Textarea label="Markdown 消息模板" value={push.weworkWebhook?.template || ""} onChange={(e) => updatePush("weworkWebhook.template", e.target.value)} rows={6} />
         </div>
       )}
 
-      {/* 邮件 */}
       {subTab === "email" && (
         <div className="space-y-5">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-semibold text-neutral-800">邮件通知</h3>
-              <p className="text-sm text-neutral-600 mt-0.5">通过 SMTP 发送线索通知邮件，支持多收件人。</p>
+              <p className="text-sm text-neutral-600 mt-0.5">通过 SMTP 发送线索通知邮件。</p>
             </div>
-            <Switch checked={true} onChange={() => {}} label="启用" />
+            <Switch checked={push.email?.enabled ?? false} onChange={(v) => updatePush("email.enabled", v)} label="启用" />
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Input label="SMTP 服务器地址" placeholder="smtp.example.com" />
-            <Input label="SMTP 端口" type="number" placeholder="587" />
+            <Input label="SMTP 服务器地址" value={push.email?.smtpHost || ""} onChange={(e) => updatePush("email.smtpHost", e.target.value)} placeholder="smtp.example.com" />
+            <Input label="SMTP 端口" type="number" value={push.email?.smtpPort || ""} onChange={(e) => updatePush("email.smtpPort", e.target.value)} placeholder="587" />
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Input label="发件邮箱地址" type="email" placeholder="noreply@renzheng.com" />
-            <Input label="发件邮箱密码" type="password" placeholder="••••••••••••••••" hint="建议使用 SMTP 授权码而非登录密码" />
+            <Input label="发件邮箱地址" type="email" value={push.email?.fromEmail || ""} onChange={(e) => updatePush("email.fromEmail", e.target.value)} placeholder="noreply@9001.ltd" />
+            <Input label="发件邮箱密码" type="password" value={push.email?.fromPassword || ""} onChange={(e) => updatePush("email.fromPassword", e.target.value)} placeholder="••••••••••••••••" hint="建议使用 SMTP 授权码而非登录密码" />
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
-            <Input label="发件人名称" placeholder="认证通" />
+            <Input label="发件人名称" value={push.email?.fromName || ""} onChange={(e) => updatePush("email.fromName", e.target.value)} placeholder="正远智汇" />
             <div>
               <label className="block mb-2 text-sm font-medium text-neutral-700">加密方式</label>
               <div className="flex gap-3">
-                <label className="flex items-center gap-1.5 text-sm text-neutral-600 cursor-pointer">
-                  <input type="radio" name="encryption" defaultChecked className="size-[18px] accent-primary-500" /> STARTTLS
-                </label>
-                <label className="flex items-center gap-1.5 text-sm text-neutral-600 cursor-pointer">
-                  <input type="radio" name="encryption" className="size-[18px] accent-primary-500" /> SSL/TLS
-                </label>
-                <label className="flex items-center gap-1.5 text-sm text-neutral-600 cursor-pointer">
-                  <input type="radio" name="encryption" className="size-[18px] accent-primary-500" /> 无
-                </label>
+                {["STARTTLS", "SSL/TLS", "无"].map((enc) => (
+                  <label key={enc} className="flex items-center gap-1.5 text-sm text-neutral-600 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="encryption"
+                      checked={(push.email?.encryption || "STARTTLS") === enc}
+                      onChange={() => updatePush("email.encryption", enc)}
+                      className="size-[18px] accent-primary-500"
+                    /> {enc}
+                  </label>
+                ))}
               </div>
             </div>
           </div>
-          <div>
-            <label className="block mb-2 text-sm font-medium text-neutral-700">收件人列表</label>
-            <Textarea
-              placeholder="admin@renzheng.com&#10;sales@renzheng.com"
-              hint="每行一个邮箱地址，新线索将同步发送至所有地址"
-              rows={3}
-            />
-          </div>
+          <Textarea
+            label="收件人列表"
+            value={push.email?.recipients || ""}
+            onChange={(e) => updatePush("email.recipients", e.target.value)}
+            placeholder="admin@9001.ltd&#10;sales@9001.ltd"
+            hint="每行一个邮箱地址"
+            rows={3}
+          />
           <div className="flex items-center gap-3">
             <Button variant="secondary" size="sm">发送测试邮件</Button>
             <span className="text-xs text-neutral-400">验证配置是否正确</span>

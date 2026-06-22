@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   DndContext,
@@ -11,31 +11,13 @@ import {
 } from "@dnd-kit/core";
 import { Button } from "@/components/ui/Button";
 import { Table, type TableColumn } from "@/components/ui/Table";
-import { Badge, type BadgeStatus } from "@/components/ui/Badge";
+import { Badge, type BadgeStatus as UIBadgeStatus } from "@/components/ui/Badge";
 import { Pagination } from "@/components/ui/Pagination";
 import { SlidePanel } from "@/components/ui/SlidePanel";
-
-type LeadRow = {
-  id: number;
-  name: string;
-  phone: string;
-  company: string;
-  service: string;
-  sourceUrl: string;
-  status: BadgeStatus;
-  time: string;
-};
-
-const mockLeads: LeadRow[] = Array.from({ length: 20 }, (_, i) => ({
-  id: i + 1,
-  name: ["张*明", "李*华", "王*国", "陈*雨", "刘*远"][i % 5],
-  phone: `138****${String(1000 + i).slice(-4)}`,
-  company: ["某制造集团", "某化工企业", "某建筑公司", "某食品公司", "某汽车零部件厂"][i % 5],
-  service: ["ISO9001", "ISO14001", "ISO45001", "ISO22000", "IATF 16949"][i % 5],
-  sourceUrl: `/services/${["iso-9001", "iso-14001", "iso-45001", "iso-22000", "iatf-16949"][i % 5]}`,
-  status: (["new", "contacted", "converted", "invalid"] as BadgeStatus[])[i % 4],
-  time: `2026-06-${String(17 - Math.floor(i / 5)).padStart(2, "0")} ${String(9 + (i % 6)).padStart(2, "0")}:00`,
-}));
+import { useToast } from "@/components/ui/Toast";
+import { fetchLeads, updateLead, addLead, type Lead, type BadgeStatus } from "@/lib/admin-store";
+import { Modal } from "@/components/ui/Modal";
+import { Input } from "@/components/ui/Input";
 
 const statusLabels: Record<BadgeStatus, string> = {
   new: "新线索",
@@ -45,7 +27,7 @@ const statusLabels: Record<BadgeStatus, string> = {
 };
 
 // Draggable card component
-function KanbanCard({ lead, color, onView }: { lead: LeadRow; color: string; onView: (lead: LeadRow) => void }) {
+function KanbanCard({ lead, color, onView }: { lead: Lead; color: string; onView: (lead: Lead) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: `lead-${lead.id}`,
     data: { lead },
@@ -131,20 +113,44 @@ export default function LeadsPage() {
   const view: "list" | "kanban" = viewParam === "kanban" ? "kanban" : "list";
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
-
-  // State for Kanban leads (mutable for drag-and-drop)
-  const [kanbanLeads, setKanbanLeads] = useState<LeadRow[]>(mockLeads);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
-  const [detailLead, setDetailLead] = useState<LeadRow | null>(null);
+  const [detailLead, setDetailLead] = useState<Lead | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [showNewLead, setShowNewLead] = useState(false);
+  const [newLeadForm, setNewLeadForm] = useState({ name: "", phone: "", company: "", service: "" });
+  const { addToast } = useToast();
 
-  const columns: TableColumn<LeadRow>[] = [
+  const loadLeads = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params: { status?: string; search?: string } = {};
+      if (statusFilter !== "all") params.status = statusFilter;
+      if (searchText) params.search = searchText;
+      const data = await fetchLeads(params);
+      setLeads(data);
+    } catch (e) {
+      console.error(e);
+      addToast("error", "加载线索失败");
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter, searchText, addToast]);
+
+  useEffect(() => {
+    loadLeads();
+  }, [loadLeads]);
+
+  const columns: TableColumn<Lead>[] = [
     { key: "name", header: "姓名", width: "80px" },
     { key: "phone", header: "手机号", width: "120px" },
     { key: "company", header: "公司" },
     { key: "service", header: "意向项目", width: "100px" },
     {
       key: "status", header: "状态", width: "100px",
-      render: (row) => <Badge status={row.status} />,
+      render: (row) => <Badge status={row.status as UIBadgeStatus} />,
     },
     { key: "time", header: "提交时间", width: "130px" },
     {
@@ -152,7 +158,14 @@ export default function LeadsPage() {
       render: (row) => (
         <div className="flex gap-2 justify-end">
           <Button variant="tertiary" size="sm" onClick={() => setDetailLead(row)}>详情</Button>
-          <Button variant="tertiary" size="sm">标记</Button>
+          <Button variant="tertiary" size="sm" onClick={async () => {
+            const next: BadgeStatus[] = ["new", "contacted", "converted", "invalid"];
+            const idx = next.indexOf(row.status);
+            const newStatus = next[(idx + 1) % 4];
+            await updateLead(row.id, { status: newStatus });
+            loadLeads();
+            addToast("success", `状态已更新为"${statusLabels[newStatus]}"`);
+          }}>标记</Button>
         </div>
       ),
     },
@@ -162,7 +175,7 @@ export default function LeadsPage() {
     setActiveDragId(String(event.active.id));
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     setActiveDragId(null);
     const { active, over } = event;
     if (!over) return;
@@ -171,56 +184,80 @@ export default function LeadsPage() {
     const targetCol = String(over.id).replace("col-", "");
 
     if (targetCol && ["new", "contacted", "converted", "invalid"].includes(targetCol)) {
-      setKanbanLeads((prev) =>
-        prev.map((lead) =>
-          String(lead.id) === leadId
-            ? { ...lead, status: targetCol as BadgeStatus }
-            : lead
-        )
-      );
+      const newStatus = targetCol as BadgeStatus;
+      await updateLead(Number(leadId), { status: newStatus });
+      loadLeads();
+      addToast("success", `已移至"${statusLabels[newStatus]}"`);
     }
   };
+
+  const handleStatusChange = async (leadId: number, newStatus: BadgeStatus) => {
+    await updateLead(leadId, { status: newStatus });
+    loadLeads();
+    setDetailLead((prev) => prev && prev.id === leadId ? { ...prev, status: newStatus } : prev);
+    addToast("success", `状态已更新为"${statusLabels[newStatus]}"`);
+  };
+
+  const filtered = leads;
 
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-neutral-800">线索中心</h1>
-          <p className="text-sm text-neutral-600 mt-1">管理客户留资数据，跟踪线索转化状态。</p>
+          <p className="text-sm text-neutral-600 mt-1">管理客户留资数据，跟踪线索转化状态。数据存储在服务端 SQLite 数据库中。</p>
         </div>
         <div>
-          <Button variant="secondary" size="sm">导出 Excel</Button>
+          <div className="flex gap-2">
+            <Button variant="secondary" size="sm" onClick={() => addToast("success", "导出功能开发中")}>导出 Excel</Button>
+            <Button variant="primary" size="sm" onClick={() => setShowNewLead(true)}>+ 新建线索</Button>
+          </div>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
-        <select className="h-10 px-3 text-sm border border-neutral-300 rounded-sm bg-white">
-          <option>全部状态</option>
-          <option>新线索</option>
-          <option>已联系</option>
-          <option>已转化</option>
-          <option>无效</option>
+        <select
+          value={statusFilter}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+          className="h-10 px-3 text-sm border border-neutral-300 rounded-sm bg-white"
+        >
+          <option value="all">全部状态</option>
+          <option value="new">新线索</option>
+          <option value="contacted">已联系</option>
+          <option value="converted">已转化</option>
+          <option value="invalid">无效</option>
         </select>
-        <input type="search" placeholder="搜索姓名/公司/手机号..." className="h-10 px-3 text-sm border border-neutral-300 rounded-sm w-56 focus:border-primary-500" />
-        <input type="date" className="h-10 px-3 text-sm border border-neutral-300 rounded-sm" />
+        <input
+          type="search"
+          placeholder="搜索姓名/公司/手机号..."
+          value={searchText}
+          onChange={(e) => { setSearchText(e.target.value); setPage(1); }}
+          className="h-10 px-3 text-sm border border-neutral-300 rounded-sm w-56 focus:border-primary-500"
+        />
       </div>
 
       {view === "list" ? (
         <>
           <div className="bg-white border border-neutral-200 rounded-md">
-            <Table columns={columns} data={kanbanLeads.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)} rowKey={(r) => r.id} />
+            {loading ? (
+              <p className="text-sm text-neutral-400 text-center py-12">加载中...</p>
+            ) : filtered.length > 0 ? (
+              <Table columns={columns} data={filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)} rowKey={(r) => r.id} />
+            ) : (
+              <p className="text-sm text-neutral-400 text-center py-12">暂无线索数据</p>
+            )}
           </div>
           <div className="mt-4 flex items-center justify-between">
-            <span className="text-sm text-neutral-400">共 {kanbanLeads.length} 条线索</span>
-            <Pagination current={page} total={kanbanLeads.length} pageSize={PAGE_SIZE} onChange={setPage} />
+            <span className="text-sm text-neutral-400">共 {filtered.length} 条线索</span>
+            {filtered.length > PAGE_SIZE && <Pagination current={page} total={filtered.length} pageSize={PAGE_SIZE} onChange={setPage} />}
           </div>
         </>
       ) : (
         <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex gap-4 overflow-x-auto pb-4">
             {statuses.map((col) => {
-              const colLeads = kanbanLeads.filter((l) => l.status === col.key);
+              const colLeads = filtered.filter((l) => l.status === col.key);
               return (
                 <KanbanColumn
                   key={col.key}
@@ -276,7 +313,7 @@ export default function LeadsPage() {
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400">来源页面</p>
-                  <p className="text-sm text-primary-500 mt-0.5">{detailLead.sourceUrl}</p>
+                  <p className="text-sm text-primary-500 mt-0.5">{detailLead.source_url || detailLead.sourceUrl}</p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400">提交时间</p>
@@ -284,7 +321,7 @@ export default function LeadsPage() {
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400">当前状态</p>
-                  <Badge status={detailLead.status} />
+                  <Badge status={detailLead.status as UIBadgeStatus} />
                 </div>
               </div>
             </div>
@@ -296,12 +333,7 @@ export default function LeadsPage() {
                 {(["new", "contacted", "converted", "invalid"] as BadgeStatus[]).map((s) => (
                   <button
                     key={s}
-                    onClick={() => {
-                      setKanbanLeads((prev) =>
-                        prev.map((l) => (l.id === detailLead.id ? { ...l, status: s } : l))
-                      );
-                      setDetailLead((prev) => prev ? { ...prev, status: s } : null);
-                    }}
+                    onClick={() => handleStatusChange(detailLead.id, s)}
                     className={[
                       "px-3 py-1.5 text-xs font-medium rounded-sm transition-colors border",
                       detailLead.status === s
@@ -315,7 +347,7 @@ export default function LeadsPage() {
               </div>
             </div>
 
-            {/* Follow-up Notes (placeholder) */}
+            {/* Follow-up Notes */}
             <div>
               <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">跟进记录</h3>
               <div className="text-sm text-neutral-400 py-4 text-center border border-dashed border-neutral-200 rounded-md">
@@ -325,6 +357,40 @@ export default function LeadsPage() {
           </div>
         )}
       </SlidePanel>
+
+      {/* New Lead Modal */}
+      <Modal
+        open={showNewLead}
+        onClose={() => setShowNewLead(false)}
+        title="新建线索"
+        size="md"
+      >
+        <div className="space-y-4">
+          <Input label="姓名" value={newLeadForm.name} onChange={(e) => setNewLeadForm({ ...newLeadForm, name: e.target.value })} placeholder="客户姓名" />
+          <Input label="手机号" value={newLeadForm.phone} onChange={(e) => setNewLeadForm({ ...newLeadForm, phone: e.target.value })} placeholder="手机号" />
+          <Input label="公司" value={newLeadForm.company} onChange={(e) => setNewLeadForm({ ...newLeadForm, company: e.target.value })} placeholder="公司名称" />
+          <Input label="意向项目" value={newLeadForm.service} onChange={(e) => setNewLeadForm({ ...newLeadForm, service: e.target.value })} placeholder="如: ISO9001" />
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="tertiary" onClick={() => setShowNewLead(false)}>取消</Button>
+            <Button variant="primary" onClick={async () => {
+              if (!newLeadForm.name.trim()) return;
+              await addLead({
+                name: newLeadForm.name.trim(),
+                phone: newLeadForm.phone.trim(),
+                company: newLeadForm.company.trim(),
+                service: newLeadForm.service.trim() || "未指定",
+                source_url: "/admin/leads",
+                status: "new",
+                time: new Date().toISOString().replace("T", " ").slice(0, 16),
+              });
+              setShowNewLead(false);
+              setNewLeadForm({ name: "", phone: "", company: "", service: "" });
+              loadLeads();
+              addToast("success", "线索已创建");
+            }}>创建</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

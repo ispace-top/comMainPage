@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ToastProvider } from "@/components/ui/Toast";
 import { SetHtmlLang } from "@/components/layout/SetHtmlLang";
 import { HreflangTags } from "@/components/ui/HreflangTags";
+import { langPath } from "@/lib/i18n";
 type LangType = "zh" | "en";
 const validLangs: LangType[] = ["zh", "en"];
 
@@ -16,22 +17,22 @@ export async function generateMetadata({
   const effectiveLang: LangType = validLangs.includes(lang as LangType) ? (lang as LangType) : "zh";
 
   const titles: Record<LangType, string> = {
-    zh: "认证通 — 专业企业认证服务 | ISO9001 ISO14001 认证咨询",
-    en: "Renzheng — Professional Certification Services | ISO9001 ISO14001",
+    zh: "正远智汇 — 专业企业认证服务 | ISO9001 ISO14001 认证咨询",
+    en: "ZhengyuanZhihui — Professional Certification Services | ISO9001 ISO14001",
   };
 
   const descriptions: Record<LangType, string> = {
-    zh: "认证通为企业提供 ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务，10+年行业经验，500+企业信赖，98%认证通过率。",
-    en: "Renzheng provides ISO9001, ISO14001, ISO45001 certification consulting. 10+ years of expertise, 500+ enterprises, 98% success rate.",
+    zh: "正远智汇为企业提供 ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务，10+年行业经验，500+企业信赖，98%认证通过率。",
+    en: "ZhengyuanZhihui provides ISO9001, ISO14001, ISO45001 certification consulting. 10+ years of expertise, 500+ enterprises, 98% success rate.",
   };
 
   return {
     title: titles[effectiveLang],
     description: descriptions[effectiveLang],
     alternates: {
-      canonical: `/${effectiveLang}`,
+      canonical: langPath(effectiveLang, "/"),
       languages: {
-        zh: "/zh",
+        zh: "/",
         en: "/en",
       },
     },

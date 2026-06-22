@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { ToastProvider } from "@/components/ui/Toast";
 import { isAuthenticated, getAuthUser, logout as doLogout, type Role } from "@/lib/auth";
 
@@ -59,6 +59,7 @@ function MenuIcon({ name, active }: { name: string; active: boolean }) {
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
@@ -103,7 +104,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center justify-center size-8 rounded-md bg-primary-500 shrink-0">
               <span className="text-white font-bold text-sm">R</span>
             </div>
-            {!collapsed && <span className="ml-3 font-semibold text-white text-sm">认证通 CMS</span>}
+            {!collapsed && <span className="ml-3 font-semibold text-white text-sm">正远智汇 CMS</span>}
           </div>
 
           {/* Menu */}
@@ -113,7 +114,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 {!collapsed && <p className="px-4 py-2 text-xs font-medium text-neutral-500 uppercase tracking-wider">{group.group}</p>}
                 <ul>
                   {group.items.map((item) => {
-                    const isActive = item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href.split("?")[0]);
+                    // Match both pathname AND query params precisely so tabs under
+                    // the same path (e.g. /admin/content?tab=services vs ?tab=cases)
+                    // highlight independently.
+                    const [itemPath, itemQuery = ""] = item.href.split("?");
+                    const currentQuery = searchParams.toString();
+                    const isActive = item.href === "/admin"
+                      ? pathname === "/admin" && !currentQuery
+                      : pathname === itemPath && currentQuery === itemQuery;
                     return (
                       <li key={item.href}>
                         <Link

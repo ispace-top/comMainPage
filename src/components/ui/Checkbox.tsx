@@ -1,6 +1,6 @@
 "use client";
 
-import { type InputHTMLAttributes, forwardRef } from "react";
+import { type InputHTMLAttributes, forwardRef, useId } from "react";
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {
   label?: React.ReactNode;
@@ -9,7 +9,8 @@ interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "typ
 
 const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(
   ({ label, error, className = "", id, ...props }, ref) => {
-    const checkboxId = id || `checkbox-${Math.random().toString(36).slice(2, 8)}`;
+    const reactId = useId();
+    const checkboxId = id || `checkbox-${reactId}`;
     return (
       <div className="flex items-start gap-2">
         <div className="relative flex items-center justify-center shrink-0 mt-0.5">
@@ -64,7 +65,8 @@ interface RadioProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type">
 
 const Radio = forwardRef<HTMLInputElement, RadioProps>(
   ({ label, className = "", id, ...props }, ref) => {
-    const radioId = id || `radio-${Math.random().toString(36).slice(2, 8)}`;
+    const reactId = useId();
+    const radioId = id || `radio-${reactId}`;
     return (
       <div className="flex items-center gap-2">
         <input

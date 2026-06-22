@@ -1,28 +1,38 @@
 import Link from "next/link";
 import type { Lang } from "@/components/ui/LanguageSwitcher";
 import { Button } from "@/components/ui/Button";
+import { langPath } from "@/lib/i18n";
+
+interface ServiceData { id: number; title: string; category?: string; }
 
 interface ServicesPreviewProps {
   lang: Lang;
+  services?: ServiceData[];
 }
-
-const services = [
-  { slug: "iso-9001", en: "ISO9001 Quality Management", zh: "ISO9001 质量管理体系" },
-  { slug: "iso-14001", en: "ISO14001 Environmental", zh: "ISO14001 环境管理体系" },
-  { slug: "iso-45001", en: "ISO45001 OH&S", zh: "ISO45001 职业健康安全" },
-  { slug: "iso-27001", en: "ISO27001 Info Security", zh: "ISO27001 信息安全管理" },
-  { slug: "iso-22000", en: "ISO22000 Food Safety", zh: "ISO22000 食品安全管理" },
-  { slug: "haccp", en: "HACCP Food Safety", zh: "HACCP 危害分析与关键控制点" },
-];
 
 const descIcons = ["🏭", "🌿", "🛡️", "🔒", "🍽️", "📋"];
 
-export function ServicesPreview({ lang }: ServicesPreviewProps) {
+function slugFromTitle(title: string): string {
+  const isoMatch = title.match(/ISO\s*(\d+)/i);
+  if (isoMatch) return `iso-${isoMatch[1]}`;
+  return title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+}
+
+export function ServicesPreview({ lang, services }: ServicesPreviewProps) {
   const title = lang === "zh" ? "认证服务项目" : "Certification Services";
   const subtitle = lang === "zh"
     ? "覆盖主流国际标准认证，满足不同行业企业的合规需求"
     : "Covering major international standards to meet compliance needs across industries";
   const viewAll = lang === "zh" ? "查看全部服务" : "View All Services";
+
+  const items = (services && services.length > 0) ? services : [
+    { id: 1, title: "ISO9001 质量管理体系" },
+    { id: 2, title: "ISO14001 环境管理体系" },
+    { id: 3, title: "ISO45001 职业健康安全管理体系" },
+    { id: 4, title: "ISO27001 信息安全管理体系" },
+    { id: 5, title: "ISO22000 食品安全管理体系" },
+    { id: 6, title: "HACCP 危害分析与关键控制点" },
+  ];
 
   return (
     <section className="section-padding bg-white">
@@ -32,16 +42,16 @@ export function ServicesPreview({ lang }: ServicesPreviewProps) {
           <p className="mt-4 text-lg text-neutral-500">{subtitle}</p>
         </div>
         <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service, i) => (
+          {items.map((s, i) => (
             <Link
-              key={service.slug}
-              href={`/${lang}/services/${service.slug}`}
+              key={s.id}
+              href={langPath(lang, `/services/${slugFromTitle(s.title)}`)}
               className="group flex flex-col h-full bg-white border border-neutral-200 rounded-md p-6 shadow-xs hover:shadow-sm hover:-translate-y-0.5 transition-all duration-200 ease-out reveal-on-scroll"
               style={{ transitionDelay: `${i * 80}ms` }}
             >
-              <span className="text-3xl">{descIcons[i]}</span>
+              <span className="text-3xl">{descIcons[i % descIcons.length]}</span>
               <h3 className="mt-4 text-xl font-semibold text-neutral-800 group-hover:text-primary-500 transition-colors">
-                {lang === "zh" ? service.zh : service.en}
+                {s.title}
               </h3>
               <p className="mt-2 text-sm text-neutral-500 flex-1">
                 {lang === "zh"
@@ -58,7 +68,7 @@ export function ServicesPreview({ lang }: ServicesPreviewProps) {
           ))}
         </div>
         <div className="flex justify-center mt-10 reveal-on-scroll">
-          <Link href={`/${lang}/services`}>
+          <Link href={langPath(lang, "/services")}>
             <Button variant="secondary" size="lg">
               {viewAll}
             </Button>

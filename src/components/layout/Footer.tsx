@@ -1,47 +1,59 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { Lang } from "@/components/ui/LanguageSwitcher";
+import { langPath } from "@/lib/i18n";
 
 interface FooterProps {
   lang: Lang;
 }
 
 export function Footer({ lang }: FooterProps) {
+  const [logoUrl, setLogoUrl] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((s) => { if (s.logoUrl) setLogoUrl(s.logoUrl); })
+      .catch(() => {});
+  }, []);
   const t = {
     companyDesc: lang === "zh"
-      ? "认证通 — 专业企业认证咨询服务提供商。深耕认证行业10+年，服务500+企业，以98%认证通过率助力企业标准化建设。"
-      : "Renzheng — Professional certification consulting provider. 10+ years of expertise, serving 500+ enterprises with 98% success rate.",
+      ? "正远智汇 — 专业企业认证咨询服务提供商。深耕认证行业10+年，服务500+企业，以98%认证通过率助力企业标准化建设。"
+      : "ZhengyuanZhihui — Professional certification consulting provider. 10+ years of expertise, serving 500+ enterprises with 98% success rate.",
     quickLinks: lang === "zh" ? "快速链接" : "Quick Links",
     services: lang === "zh" ? "认证服务" : "Services",
     contactUs: lang === "zh" ? "联系我们" : "Contact Us",
     address: lang === "zh"
-      ? "北京市朝阳区建国路88号SOHO现代城A座"
-      : "Building A, SOHO Modern Town, No.88 Jianguo Road, Chaoyang, Beijing",
+      ? "北京市密云区西田各庄镇卸河路6号135室"
+      : "Room 135, No.6 Xiehe Road, Xitiangezhuang Town, Miyun District, Beijing",
     phone: "400-888-9999",
-    email: "contact@renzheng.com",
+    email: "info@9001.ltd",
     workHours: lang === "zh" ? "工作时间: 周一至周五 9:00-18:00" : "Hours: Mon-Fri 9:00-18:00",
     copyright: (year: number) =>
       lang === "zh"
-        ? `© ${year} 认证通. All rights reserved.`
-        : `© ${year} Renzheng. All rights reserved.`,
+        ? `© ${year} 正远智汇. All rights reserved.`
+        : `© ${year} ZhengyuanZhihui. All rights reserved.`,
     icp: lang === "zh" ? "京ICP备2024XXXXXXXX号" : "ICP Registration No. 2024XXXXXXXX",
   };
 
   const year = new Date().getFullYear();
 
   const quickLinks = [
-    { label: lang === "zh" ? "首页" : "Home", href: `/${lang}` },
-    { label: lang === "zh" ? "关于我们" : "About", href: `/${lang}/about` },
-    { label: lang === "zh" ? "成功案例" : "Cases", href: `/${lang}/cases` },
-    { label: lang === "zh" ? "行业洞察" : "Insights", href: `/${lang}/insights` },
-    { label: lang === "zh" ? "联系我们" : "Contact", href: `/${lang}/contact` },
+    { label: lang === "zh" ? "首页" : "Home", href: langPath(lang, "/") },
+    { label: lang === "zh" ? "关于我们" : "About", href: langPath(lang, "/about") },
+    { label: lang === "zh" ? "成功案例" : "Cases", href: langPath(lang, "/cases") },
+    { label: lang === "zh" ? "行业洞察" : "Insights", href: langPath(lang, "/insights") },
+    { label: lang === "zh" ? "联系我们" : "Contact", href: langPath(lang, "/contact") },
   ];
 
   const serviceLinks = [
-    { label: "ISO9001", href: `/${lang}/services/iso-9001` },
-    { label: "ISO14001", href: `/${lang}/services/iso-14001` },
-    { label: "ISO45001", href: `/${lang}/services/iso-45001` },
-    { label: "ISO27001", href: `/${lang}/services/iso-27001` },
-    { label: lang === "zh" ? "查看全部 →" : "View All →", href: `/${lang}/services` },
+    { label: "ISO9001", href: langPath(lang, "/services/iso-9001") },
+    { label: "ISO14001", href: langPath(lang, "/services/iso-14001") },
+    { label: "ISO45001", href: langPath(lang, "/services/iso-45001") },
+    { label: "ISO27001", href: langPath(lang, "/services/iso-27001") },
+    { label: lang === "zh" ? "查看全部 →" : "View All →", href: langPath(lang, "/services") },
   ];
 
   return (
@@ -51,11 +63,15 @@ export function Footer({ lang }: FooterProps) {
           {/* Company */}
           <div className="lg:col-span-1.4">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="flex items-center justify-center size-10 rounded-md bg-primary-500">
-                <span className="text-white font-bold text-lg">R</span>
-              </div>
+              {logoUrl ? (
+                <img src={logoUrl} alt="Logo" className="h-10 w-auto object-contain" />
+              ) : (
+                <div className="flex items-center justify-center size-10 rounded-md bg-primary-500">
+                  <span className="text-white font-bold text-lg">正</span>
+                </div>
+              )}
               <span className="text-white font-bold text-lg">
-                {lang === "zh" ? "认证通" : "Renzheng"}
+                {lang === "zh" ? "正远智汇" : "ZhengyuanZhihui"}
               </span>
             </div>
             <div className="w-6 h-0.5 bg-primary-400 mb-4" />
@@ -159,10 +175,10 @@ export function Footer({ lang }: FooterProps) {
             {t.copyright(year)} &nbsp;|&nbsp; {t.icp}
           </div>
           <div className="flex items-center gap-4 text-sm text-neutral-500">
-            <Link href={`/${lang}/about`} className="hover:text-white transition-colors">
+            <Link href={langPath(lang, "/about")} className="hover:text-white transition-colors">
               {lang === "zh" ? "隐私政策" : "Privacy Policy"}
             </Link>
-            <Link href={`/${lang}/about`} className="hover:text-white transition-colors">
+            <Link href={langPath(lang, "/about")} className="hover:text-white transition-colors">
               {lang === "zh" ? "使用条款" : "Terms of Use"}
             </Link>
           </div>

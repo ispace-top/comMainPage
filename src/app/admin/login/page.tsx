@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
             <div className="inline-flex items-center justify-center size-12 rounded-md bg-primary-500 mb-4">
               <span className="text-white font-bold text-xl">R</span>
             </div>
-            <h1 className="text-xl font-bold text-neutral-800">认证通 CMS</h1>
+            <h1 className="text-xl font-bold text-neutral-800">正远智汇 CMS</h1>
             <p className="text-sm text-neutral-500 mt-1">请登录以管理网站内容</p>
           </div>
 

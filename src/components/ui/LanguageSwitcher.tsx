@@ -46,10 +46,15 @@ export function LanguageSwitcher({
       setOpen(false);
       return;
     }
-    // SPA navigation using Next.js router
-    const newPath = pathname.replace(/^\/(zh|en)/, `/${lang}`);
-    router.push(newPath);
-    setOpen(false);
+    // zh uses no prefix, en uses /en prefix
+    let newPath: string;
+    if (lang === "zh") {
+      newPath = pathname.replace(/^\/en/, "") || "/";
+    } else {
+      newPath = `/en${pathname}`;
+    }
+    // Use window.location for a full navigation to ensure content updates
+    window.location.href = newPath;
   };
 
   if (variant === "mobile") {

@@ -28,14 +28,14 @@ export function Footer({ lang }: FooterProps) {
     address: lang === "zh"
       ? "北京市密云区西田各庄镇卸河路6号135室"
       : "Room 135, No.6 Xiehe Road, Xitiangezhuang Town, Miyun District, Beijing",
-    phone: "400-888-9999",
+    phones: ["185-1453-2009", "150-3228-4800"],
     email: "info@9001.ltd",
     workHours: lang === "zh" ? "工作时间: 周一至周五 9:00-18:00" : "Hours: Mon-Fri 9:00-18:00",
     copyright: (year: number) =>
       lang === "zh"
         ? `© ${year} 正远智汇. All rights reserved.`
         : `© ${year} ZhengyuanZhihui. All rights reserved.`,
-    icp: lang === "zh" ? "京ICP备2024XXXXXXXX号" : "ICP Registration No. 2024XXXXXXXX",
+    icp: lang === "zh" ? "京ICP备2025143259号-1" : "ICP Reg. 京ICP备2025143259号-1",
   };
 
   const year = new Date().getFullYear();
@@ -126,7 +126,7 @@ export function Footer({ lang }: FooterProps) {
                 <svg className="size-5 text-primary-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 012.43 8.326 13.022 13.022 0 012 5V3.5z" />
                 </svg>
-                {t.phone}
+                <span className="whitespace-pre-line">{t.phones.join("\n")}</span>
               </li>
               <li className="flex items-center gap-3 text-sm">
                 <svg className="size-5 text-primary-400 shrink-0" viewBox="0 0 20 20" fill="currentColor">

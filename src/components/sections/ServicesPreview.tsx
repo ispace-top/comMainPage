@@ -10,9 +10,11 @@ interface ServicesPreviewProps {
   services?: ServiceData[];
 }
 
-const descIcons = ["🏭", "🌿", "🛡️", "🔒", "🍽️", "📋"];
+const descIcons = ["✅", "🏭", "🌿", "🛡️", "🔒", "🍽️", "📋"];
 
 function slugFromTitle(title: string): string {
+  const cccMatch = title.match(/^CCC/i);
+  if (cccMatch) return "ccc";
   const isoMatch = title.match(/ISO\s*(\d+)/i);
   if (isoMatch) return `iso-${isoMatch[1]}`;
   return title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -26,12 +28,13 @@ export function ServicesPreview({ lang, services }: ServicesPreviewProps) {
   const viewAll = lang === "zh" ? "查看全部服务" : "View All Services";
 
   const items = (services && services.length > 0) ? services : [
-    { id: 1, title: "ISO9001 质量管理体系" },
-    { id: 2, title: "ISO14001 环境管理体系" },
-    { id: 3, title: "ISO45001 职业健康安全管理体系" },
-    { id: 4, title: "ISO27001 信息安全管理体系" },
-    { id: 5, title: "ISO22000 食品安全管理体系" },
-    { id: 6, title: "HACCP 危害分析与关键控制点" },
+    { id: 1, title: "CCC 中国强制性产品认证" },
+    { id: 2, title: "ISO9001 质量管理体系" },
+    { id: 3, title: "ISO14001 环境管理体系" },
+    { id: 4, title: "ISO45001 职业健康安全管理体系" },
+    { id: 5, title: "ISO27001 信息安全管理体系" },
+    { id: 6, title: "ISO22000 食品安全管理体系" },
+    { id: 7, title: "HACCP 危害分析与关键控制点" },
   ];
 
   return (

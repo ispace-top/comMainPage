@@ -1,14 +1,14 @@
 export const PAGE_DATA = {
   hero: {
     zh: {
-      title: "ISO 认证咨询专家\n助力企业标准化建设",
-      subtitle: "北京正远智汇 — 专注 ISO9001、ISO14001、ISO45001 认证咨询，10+年经验，98% 一次性通过率",
+      title: "CCC、ISO 认证咨询专家\n助力企业标准化建设",
+      subtitle: "北京正远智汇 — 专注 3C、ISO9001、ISO14001、ISO45001 认证咨询，10+年经验，98% 一次性通过率",
       cta1: "免费获取方案",
       cta2: "认证服务",
     },
     en: {
-      title: "ISO Certification Experts\nEmpowering Business Standards",
-      subtitle: "Beijing ZhengyuanZhihui — Specializing in ISO9001, ISO14001, ISO45001 consulting with 10+ years of expertise",
+      title: "CCC & ISO Certification Experts\nEmpowering Business Standards",
+      subtitle: "Beijing ZhengyuanZhihui — Specializing in 3C, ISO9001, ISO14001, ISO45001 consulting with 10+ years of expertise",
       cta1: "Get a Free Quote",
       cta2: "Our Services",
     },
@@ -85,6 +85,24 @@ export const SERVICE_DETAILS: Record<string, {
   zh: { name: string; desc: string; category: string; intro: string; suitable: string; process: string[] };
   en: { name: string; desc: string; category: string; intro: string; suitable: string; process: string[] };
 }> = {
+  "ccc": {
+    zh: {
+      name: "CCC 中国强制性产品认证",
+      category: "CCC认证",
+      desc: "国家对涉及健康安全、环保和公共安全的产品实施的市场准入制度，是产品进入中国市场的安全通行证。",
+      intro: "CCC 认证（China Compulsory Certification）是中国强制性产品认证制度，由国家认监委监管。覆盖电子电器、汽车零部件、玩具、建材等 16 大类产品。正远智汇提供从产品测试、工厂审查到获证维护的全流程 CCC 认证咨询服务，帮助企业高效、合规地取得 CCC 证书。",
+      suitable: "电子产品、家用电器、汽车零部件、玩具、建材、照明设备、安全玻璃等需要在中国市场销售的生产企业。",
+      process: ["产品范围确认与标准解读", "型式试验样品准备与送检", "工厂质量保证能力审查辅导", "不符合项整改与复审", "获证后年度监督审查维护", "证书变更与延续服务"],
+    },
+    en: {
+      name: "CCC China Compulsory Certification",
+      category: "CCC Certification",
+      desc: "China's mandatory market access system for products involving health, safety, environmental protection, and public security.",
+      intro: "CCC (China Compulsory Certification) is regulated by CNCA, covering 16 major product categories. We provide end-to-end CCC consulting from product testing and factory audit to post-certification maintenance.",
+      suitable: "Manufacturers of electronics, appliances, automotive parts, toys, building materials, lighting, and safety glass entering the Chinese market.",
+      process: ["Product scope & standard review", "Type test sample preparation", "Factory quality audit guidance", "Non-conformance correction", "Annual surveillance audit support", "Certificate modification & renewal"],
+    },
+  },
   "iso-9001": {
     zh: {
       name: "ISO9001 质量管理体系",
@@ -159,4 +177,4 @@ export const SERVICE_DETAILS: Record<string, {
   },
 };
 
-export const SERVICE_SLUGS = ["iso-9001", "iso-14001", "iso-45001", "iso-27001"];
+export const SERVICE_SLUGS = ["ccc", "iso-9001", "iso-14001", "iso-45001", "iso-27001"];

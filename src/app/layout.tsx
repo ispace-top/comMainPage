@@ -11,12 +11,13 @@ const FAVICON_BASE64 =
 export const metadata: Metadata = {
   title: {
     template: "%s | 正远智汇",
-    default: "正远智汇 — ISO 认证咨询专家 | ISO9001 ISO14001 ISO45001",
+    default: "正远智汇 — CCC、ISO 认证咨询专家 | ISO9001 ISO14001 ISO45001",
   },
   description:
-    "北京正远智汇科技有限公司 — 专注 ISO9001、ISO14001、ISO45001 认证咨询服务，10+年行业经验，98%认证通过率，500+企业信赖。",
+    "北京正远智汇科技有限公司 — 专注CCC、ISO9001、ISO14001、ISO45001 认证咨询服务，10+年行业经验，98%认证通过率，500+企业信赖。",
   icons: { icon: FAVICON_BASE64 },
   keywords: [
+    "CCC认证",
     "ISO9001认证",
     "ISO14001认证",
     "ISO45001认证",
@@ -32,9 +33,9 @@ export const metadata: Metadata = {
     locale: "zh_CN",
     alternateLocale: "en_US",
     siteName: "正远智汇",
-    title: "正远智汇 — ISO 认证咨询专家",
+    title: "正远智汇 — CCC、ISO 认证咨询专家",
     description:
-      "北京正远智汇科技有限公司为企业提供 ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务。",
+      "北京正远智汇科技有限公司为企业提供 CCC、ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务。",
   },
 };
 

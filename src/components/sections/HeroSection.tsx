@@ -9,14 +9,14 @@ interface HeroSectionProps {
 
 const defaults = {
   zh: {
-    title: "助力企业标准化建设\n迈向国际认证新高度",
-    subtitle: "专注 ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务，以专业团队和卓越通过率，为企业构建可信任的管理体系。",
+    title: "CCC、ISO 认证咨询专家\n助力企业标准化建设",
+    subtitle: "专注 3C、ISO9001、ISO14001、ISO45001 等国际标准认证咨询服务，以专业团队和卓越通过率，为企业构建可信任的管理体系。",
     ctaPrimary: "免费获取认证方案",
     ctaSecondary: "了解服务详情",
   },
   en: {
-    title: "Empower Your Business\nwith International Standards",
-    subtitle: "Specialized in ISO9001, ISO14001, ISO45001 certification consulting. Build trusted management systems with our expert team and proven success rate.",
+    title: "Empower Your Business\nwith CCC & International Standards",
+    subtitle: "Specialized in 3C, ISO9001, ISO14001, ISO45001 certification consulting. Build trusted management systems with our expert team and proven success rate.",
     ctaPrimary: "Get Free Consultation",
     ctaSecondary: "Our Services",
   },

@@ -17,6 +17,8 @@ import { SERVICE_DETAILS, SERVICE_SLUGS } from "@/lib/seed-data";
 const PAGE_SIZE = 9;
 
 function slugFromTitle(title: string): string {
+  const cccMatch = title.match(/^CCC/i);
+  if (cccMatch) return "ccc";
   const isoMatch = title.match(/ISO\s*(\d+)/i);
   if (isoMatch) return `iso-${isoMatch[1]}`;
   return title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
@@ -26,6 +28,7 @@ const icons = ["🏭", "🌿", "🛡️", "🔒", "🍽️", "📋", "🚗", "�
 
 const categories = [
   { key: "all", zh: "全部", en: "All" },
+  { key: "CCC认证", zh: "CCC 认证", en: "CCC Certification" },
   { key: "ISO体系", zh: "ISO 体系", en: "ISO Systems" },
 ];
 

@@ -121,8 +121,8 @@ function initSchema() {
         { id: "contact", label: "联系我们", href: "/contact" },
       ]),
       pushSettings: JSON.stringify({
-        weworkBot: { enabled: true, webhookUrl: "", template: "" },
-        weworkWebhook: { enabled: false, corpId: "", corpSecret: "", agentId: "", toUser: "", template: "" },
+        weworkBot: { enabled: true, webhookUrl: "", template: "", picurl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=640&h=320&fit=crop&q=80" },
+        weworkWebhook: { enabled: false, corpId: "", corpSecret: "", agentId: "", toUser: "", template: "", picurl: "" },
         email: { enabled: true, smtpHost: "", smtpPort: "587", fromEmail: "", fromPassword: "", fromName: "正远智汇", encryption: "STARTTLS", recipients: "" },
       }),
       pageData: JSON.stringify(PAGE_DATA),

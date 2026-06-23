@@ -83,25 +83,43 @@ export default function ContactPage() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      // POST lead to admin API — real persistence
       const typeLabel = typeOptions.find((o) => o.value === form.type)?.label || "";
-      await fetch("/api/admin/leads", {
+      // Build service string: preserve both type and full message
+      let service = typeLabel || (lang === "zh" ? "未分类咨询" : "Uncategorized");
+      if (form.message.trim()) {
+        service = typeLabel
+          ? `${typeLabel} — ${form.message.trim()}`
+          : `${lang === "zh" ? "留言" : "Message"} — ${form.message.trim()}`;
+      }
+      // Capture referring page as source; fallback to current page
+      const referrer = typeof document !== "undefined" ? document.referrer : "";
+      const sourceUrl = referrer
+        ? new URL(referrer).pathname
+        : `/${lang}/contact`;
+
+      const res = await fetch("/api/admin/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name.trim(),
           phone: form.phone.trim(),
           company: form.company.trim(),
-          service: `${typeLabel}${form.message ? ` — ${form.message.slice(0, 50)}` : ""}`,
-          source_url: `/${lang}/contact`,
+          service,
+          source_url: sourceUrl,
           status: "new",
         }),
       });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({ error: "提交失败" }));
+        addToast("error", errData.error || (lang === "zh" ? "提交失败，请稍后重试" : "Submission failed, please try again"));
+        setSubmitting(false);
+        return;
+      }
       addToast("success", lang === "zh" ? "提交成功！我们将在24小时内与您联系。" : "Submitted! We will contact you within 24 hours.");
       setForm({ name: "", phone: "", company: "", type: "", message: "" });
       setAgreed(false);
     } catch {
-      addToast("error", lang === "zh" ? "提交失败，请稍后重试" : "Submission failed, please try again");
+      addToast("error", lang === "zh" ? "网络错误，请稍后重试" : "Network error, please try again");
     } finally {
       setSubmitting(false);
     }

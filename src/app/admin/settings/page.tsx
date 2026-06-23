@@ -258,6 +258,8 @@ function PushConfigTab({
   onChange: (s: Record<string, string>) => void;
 }) {
   const [subTab, setSubTab] = useState<"wework-bot" | "wework-webhook" | "email">("wework-bot");
+  const [testEmailLoading, setTestEmailLoading] = useState(false);
+  const { addToast } = useToast();
 
   const push = (() => {
     try { return JSON.parse(settings.pushSettings || "{}"); } catch { return {}; }
@@ -303,7 +305,7 @@ function PushConfigTab({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-semibold text-neutral-800">企业微信机器人</h3>
-              <p className="text-sm text-neutral-600 mt-0.5">通过企微群机器人推送 Markdown 格式的线索通知到指定群聊。</p>
+              <p className="text-sm text-neutral-600 mt-0.5">通过企微群机器人推送图文卡片格式的线索通知到指定群聊，个人微信可正常查看。</p>
             </div>
             <Switch checked={push.weworkBot?.enabled ?? false} onChange={(v) => updatePush("weworkBot.enabled", v)} label="启用" />
           </div>
@@ -315,13 +317,21 @@ function PushConfigTab({
             placeholder="https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxxxx"
             hint="在企微群聊中添加机器人后获取此地址"
           />
+          <Input
+            label="卡片配图 URL"
+            type="url"
+            value={push.weworkBot?.picurl || ""}
+            onChange={(e) => updatePush("weworkBot.picurl", e.target.value)}
+            placeholder="https://your-domain.com/notification-banner.png"
+            hint="图文卡片封面图，建议 640×320px，JPG/PNG，需公网可访问。建议部署后替换为自己的配图"
+          />
           <div>
-            <label className="block mb-2 text-sm font-medium text-neutral-700">Markdown 消息模板</label>
+            <label className="block mb-2 text-sm font-medium text-neutral-700">卡片描述模板（纯文本）</label>
             <Textarea
               value={push.weworkBot?.template || ""}
               onChange={(e) => updatePush("weworkBot.template", e.target.value)}
               rows={6}
-              hint='支持变量: {name} {phone} {company} {service_name} {source_url} {admin_url}'
+              hint='支持变量: {name} {phone} {company} {service_name} {source_url} {admin_url}。留空使用默认格式'
             />
           </div>
         </div>
@@ -332,7 +342,7 @@ function PushConfigTab({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-base font-semibold text-neutral-800">企业微信 Webhook</h3>
-              <p className="text-sm text-neutral-600 mt-0.5">通过企微应用消息 API 发送通知。</p>
+              <p className="text-sm text-neutral-600 mt-0.5">通过企微应用消息 API 发送图文卡片通知，与机器人渠道格式一致。</p>
             </div>
             <Switch checked={push.weworkWebhook?.enabled ?? false} onChange={(v) => updatePush("weworkWebhook.enabled", v)} label="启用" />
           </div>
@@ -340,7 +350,23 @@ function PushConfigTab({
           <Input label="Corp Secret (应用密钥)" type="password" value={push.weworkWebhook?.corpSecret || ""} onChange={(e) => updatePush("weworkWebhook.corpSecret", e.target.value)} placeholder="••••••••••••••••" />
           <Input label="Agent ID (应用编号)" type="number" value={push.weworkWebhook?.agentId || ""} onChange={(e) => updatePush("weworkWebhook.agentId", e.target.value)} placeholder="1000001" />
           <Input label="接收人 UserID" value={push.weworkWebhook?.toUser || ""} onChange={(e) => updatePush("weworkWebhook.toUser", e.target.value)} placeholder="user1|user2|user3" hint="留空则发送给应用可见范围内的所有人" />
-          <Textarea label="Markdown 消息模板" value={push.weworkWebhook?.template || ""} onChange={(e) => updatePush("weworkWebhook.template", e.target.value)} rows={6} />
+          <Input
+            label="卡片配图 URL"
+            type="url"
+            value={push.weworkWebhook?.picurl || ""}
+            onChange={(e) => updatePush("weworkWebhook.picurl", e.target.value)}
+            placeholder="https://your-domain.com/notification-banner.png"
+            hint="图文卡片封面图，建议 640×320px，JPG/PNG，公网可访问"
+          />
+          <div>
+            <label className="block mb-2 text-sm font-medium text-neutral-700">卡片描述模板（纯文本）</label>
+            <Textarea
+              value={push.weworkWebhook?.template || ""}
+              onChange={(e) => updatePush("weworkWebhook.template", e.target.value)}
+              rows={6}
+              hint='支持变量: {name} {phone} {company} {service_name} {source_url} {admin_url}。留空使用默认格式'
+            />
+          </div>
         </div>
       )}
 
@@ -389,7 +415,41 @@ function PushConfigTab({
             rows={3}
           />
           <div className="flex items-center gap-3">
-            <Button variant="secondary" size="sm">发送测试邮件</Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={testEmailLoading}
+              onClick={async () => {
+                setTestEmailLoading(true);
+                try {
+                  const res = await fetch("/api/admin/settings/test-email", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      smtpHost: push.email?.smtpHost,
+                      smtpPort: push.email?.smtpPort,
+                      encryption: push.email?.encryption,
+                      fromEmail: push.email?.fromEmail,
+                      fromPassword: push.email?.fromPassword,
+                      fromName: push.email?.fromName,
+                      recipients: push.email?.recipients,
+                    }),
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    addToast("success", data.message);
+                  } else {
+                    addToast("error", data.message);
+                  }
+                } catch {
+                  addToast("error", "网络错误，发送失败");
+                } finally {
+                  setTestEmailLoading(false);
+                }
+              }}
+            >
+              发送测试邮件
+            </Button>
             <span className="text-xs text-neutral-400">验证配置是否正确</span>
           </div>
         </div>

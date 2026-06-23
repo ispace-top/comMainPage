@@ -54,6 +54,7 @@ export interface PushSettings {
     enabled: boolean;
     webhookUrl: string;
     template: string;
+    picurl: string;
   };
   weworkWebhook: {
     enabled: boolean;
@@ -62,6 +63,7 @@ export interface PushSettings {
     agentId: string;
     toUser: string;
     template: string;
+    picurl: string;
   };
   email: {
     enabled: boolean;
